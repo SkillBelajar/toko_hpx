@@ -10,7 +10,7 @@ class SuperadminSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@tokohpx.test'],
+            ['email' => 'admin@saas.com'],
             [
                 'name' => 'Super Admin',
                 'password' => 'password',

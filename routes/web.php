@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Superadmin\PackageController;
+use App\Http\Controllers\Superadmin\TenantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('welcome'))->name('home');
@@ -21,6 +23,14 @@ Route::middleware(['auth', 'role:superadmin'])
     ->name('superadmin.')
     ->group(function () {
         Route::view('/dashboard', 'superadmin.dashboard')->name('dashboard');
+
+        Route::resource('packages', PackageController::class)->except('show');
+
+        Route::get('/tenants', [TenantController::class, 'index'])->name('tenants.index');
+        Route::get('/tenants/{tenant}/edit', [TenantController::class, 'edit'])->name('tenants.edit');
+        Route::put('/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
+
+        Route::view('/settings', 'superadmin.settings')->name('settings');
     });
 
 Route::middleware(['auth', 'role:tenant'])
