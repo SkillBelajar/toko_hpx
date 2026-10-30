@@ -28,7 +28,7 @@
             </p>
 
             <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="#daftar" class="rounded-xl bg-indigo-600 px-6 py-3 text-center text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">
+                <a href="{{ route('register') }}" class="rounded-xl bg-indigo-600 px-6 py-3 text-center text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">
                     Daftar Gratis
                 </a>
                 <a href="#fitur" class="rounded-xl border border-slate-300 bg-white px-6 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
@@ -140,7 +140,7 @@
                     <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Limit Stok: <strong class="text-slate-900">50</strong> unit</li>
                     <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Scan IMEI, shift kasir, laporan dasar</li>
                 </ul>
-                <a href="#daftar" class="mt-8 rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50">Mulai Gratis</a>
+                <a href="{{ route('register') }}" class="mt-8 rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50">Mulai Gratis</a>
             </div>
 
             <div class="relative flex flex-col rounded-2xl border-2 border-indigo-600 bg-white p-6 shadow-xl shadow-indigo-600/10 sm:p-8">
@@ -157,7 +157,7 @@
                     <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Peringatan stok mengendap &amp; pengingat upsell</li>
                     <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Multi-kasir dengan rekap selisih per shift</li>
                 </ul>
-                <a href="#daftar" class="mt-8 rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">Pilih Pro</a>
+                <a href="{{ route('register') }}" class="mt-8 rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">Pilih Pro</a>
             </div>
         </div>
 
@@ -174,7 +174,7 @@
     <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-sky-600 px-6 py-12 text-center shadow-2xl shadow-indigo-600/20 sm:px-12">
         <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">Siap rapikan kasir &amp; stok toko HP Anda?</h2>
         <p class="mx-auto mt-3 max-w-xl text-indigo-100">Daftar gratis hari ini, catat transaksi pertama dalam 5 menit.</p>
-        <a href="#daftar" class="mt-7 inline-block rounded-xl bg-white px-7 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:bg-indigo-50">
+        <a href="{{ route('register') }}" class="mt-7 inline-block rounded-xl bg-white px-7 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:bg-indigo-50">
             Daftar Gratis
         </a>
     </div>
