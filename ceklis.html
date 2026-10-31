@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Ceklist Verifikasi TokoHPX 1.0 (Final)</title>
+<style>
+  @page { size: A4; margin: 14mm 13mm 16mm 13mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "DejaVu Sans", Arial, Helvetica, sans-serif; font-size: 9.4pt; color: #1e293b; line-height: 1.42; margin: 0; }
+
+  .head { border-bottom: 3px solid #4f46e5; padding-bottom: 8px; margin-bottom: 12px; }
+  .head h1 { font-size: 19pt; margin: 0 0 2px; color: #1e1b4b; letter-spacing: -0.3px; }
+  .head .sub { font-size: 9pt; color: #64748b; }
+  .badge { display: inline-block; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;
+           border-radius: 4px; padding: 1px 7px; font-size: 8pt; font-weight: bold; }
+
+  .meta { display: flex; gap: 10px; margin: 10px 0 14px; font-size: 8.6pt; color: #475569; }
+  .meta div { border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 8px; flex: 1; background: #f8fafc; }
+  .meta b { color: #0f172a; display: block; font-size: 8.2pt; text-transform: uppercase; letter-spacing: .4px; }
+
+  .how { background: #fffbeb; border: 1px solid #fde68a; border-radius: 5px; padding: 7px 10px;
+         font-size: 8.6pt; color: #78350f; margin-bottom: 14px; }
+
+  h2.step { font-size: 11pt; margin: 16px 0 6px; padding: 6px 9px; background: #eef2ff;
+            border-left: 4px solid #4f46e5; color: #312e81; page-break-after: avoid; }
+  h2.step .n { background: #4f46e5; color: #fff; border-radius: 3px; padding: 0 6px; margin-right: 6px;
+               font-size: 9.5pt; }
+  h2.step .tag { float: right; font-weight: normal; font-size: 8pt; color: #6366f1; text-transform: uppercase; letter-spacing: .5px; }
+
+  .why { font-size: 8.5pt; color: #64748b; margin: 0 0 7px; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 4px; page-break-inside: auto; }
+  th { background: #f1f5f9; color: #334155; font-size: 8.2pt; text-transform: uppercase;
+       letter-spacing: .4px; text-align: left; padding: 4px 6px; border: 1px solid #e2e8f0; }
+  td { padding: 4px 6px; border: 1px solid #e2e8f0; vertical-align: top; }
+  tr { page-break-inside: avoid; }
+  td.cb { width: 22px; text-align: center; font-size: 13pt; color: #94a3b8; line-height: 1; }
+  td.no { width: 26px; text-align: center; color: #64748b; font-size: 8.4pt; }
+  td.exp { width: 33%; font-size: 8.5pt; color: #0f172a; background: #fcfcfd; }
+  td.res { width: 16%; font-size: 8.3pt; color: #475569; }
+  .ok { color: #047857; font-weight: bold; }
+  .bad { color: #b91c1c; font-weight: bold; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; background: #f1f5f9;
+         padding: 0 3px; border-radius: 2px; color: #0f172a; }
+
+  .note { font-size: 8.4pt; background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d;
+          border-radius: 5px; padding: 6px 9px; margin: 6px 0 12px; }
+  .note b { color: #991b1b; }
+
+  .sign { margin-top: 18px; border: 1px solid #e2e8f0; border-radius: 5px; padding: 10px 12px; page-break-inside: avoid; }
+  .sign h3 { margin: 0 0 8px; font-size: 10pt; color: #1e1b4b; }
+  .line { border-bottom: 1px solid #cbd5e1; height: 17px; margin-bottom: 9px; }
+  .lbl { font-size: 8pt; color: #64748b; margin-bottom: 1px; }
+  .footer { margin-top: 14px; padding-top: 6px; border-top: 1px solid #e2e8f0;
+            font-size: 8pt; color: #94a3b8; text-align: center; }
+  .pb { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Ceklist Verifikasi Manual — TokoHPX</h1>
+  <div class="sub">SaaS POS Toko HP · Uji fungsional berurutan · <span class="badge">Versi 1.0 (Final)</span></div>
+</div>
+
+<div class="meta">
+  <div><b>Alamat lokal</b>http://localhost:8091</div>
+  <div><b>Alamat HP (kamera)</b>https://lung-excerpt-nuts-stick.trycloudflare.com</div>
+  <div><b>Total langkah</b>13 tahap · 70 butir</div>
+</div>
+
+<div class="how">
+  <b>Cara pakai:</b> kerjakan berurutan dari Tahap 1 sampai 13 — jangan melompat, karena banyak langkah
+  bergantung pada data dari langkah sebelumnya. Tandai kotak <b>☐</b> dengan centang setelah hasilnya
+  cocok dengan kolom <i>Hasil yang benar</i>. Kolom <i>Catatan</i> diisi bila ada penyimpangan.
+  Berhenti dan laporkan pada butir pertama yang gagal sebelum melanjutkan.
+</div>
+
+<h2 class="step"><span class="n">1</span>Pastikan sistem menyala <span class="tag">Infrastruktur</span></h2>
+<p class="why">Tanpa ini semua langkah berikutnya tidak bermakna.</p>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">1.1</td><td>Buka terminal, jalankan <code>docker compose ps</code> di folder <code>/home/mfahri/toko_hpx</code></td><td class="exp">4 container <b>Up</b>: tokohpx_app, tokohpx_web, tokohpx_db, tokohpx_redis. App &amp; db bertanda <i>(healthy)</i>.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">1.2</td><td>Buka <code>http://localhost:8091/up</code> di browser</td><td class="exp">Muncul halaman singkat bertulis <i>Application up</i> (status 200).</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">1.3</td><td>Buka <code>http://localhost:8091</code></td><td class="exp">Landing page tampil rapi (biru/indigo), bukan teks polos tanpa warna.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">1.4</td><td>Scroll ke paling bawah landing page</td><td class="exp">Footer menampilkan <b>Versi 1.0 (Final)</b>.</td><td class="res"></td></tr>
+</table>
+<div class="note"><b>Kalau gagal:</b> container mati → <code>docker compose up -d</code>. Halaman tanpa warna → CSS gagal dimuat, laporkan.</div>
+
+<h2 class="step"><span class="n">2</span>Akun &amp; login Superadmin <span class="tag">Auth</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">2.1</td><td>Buka <code>/login</code>, isi <code>admin@saas.com</code> / <code>password</code>, klik Masuk</td><td class="exp">Langsung diarahkan ke <b>/superadmin/dashboard</b> (bukan dashboard tenant).</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">2.2</td><td>Perhatikan sidebar kiri</td><td class="exp">Menu: Dashboard, Kelola Paket, Kelola Toko, Panduan, Pengaturan.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">2.3</td><td>Lihat 4 kartu angka di dashboard</td><td class="exp">Total Toko, Paket Aktif, Toko Expired, Toko Tanpa Paket — semua terisi angka.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">2.4</td><td>Logout, lalu login dengan password <b>salah</b></td><td class="exp">Tetap di halaman login, muncul pesan <i>Email atau password salah.</i></td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">3</span>Superadmin — kelola paket <span class="tag">CRUD</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">3.1</td><td>Login superadmin → menu <b>Kelola Paket</b></td><td class="exp">Tabel paket tampil minimal 3 baris: <b>Free</b> (Rp 0, limit 30/50), <b>pro</b> (Rp 90.000, limit 999999), <b>Premium</b> (Rp 150.000, limit 500/200) dengan badge <b>Default</b> pada Premium.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">3.2</td><td>Klik <b>+ Paket Baru</b>, isi Nama <code>UjiCek</code>, Harga <code>50000</code>, Limit Transaksi <code>10</code>, Limit IMEI <code>20</code>, simpan</td><td class="exp">Kembali ke daftar, paket <b>UjiCek</b> muncul di tabel.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">3.3</td><td>Klik <b>Edit</b> pada UjiCek, ubah Harga jadi <code>75000</code>, simpan</td><td class="exp">Harga di tabel berubah menjadi Rp 75.000.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">3.4</td><td>Edit UjiCek, centang <b>Jadikan paket default</b>, simpan</td><td class="exp">Badge <b>Default</b> pindah ke UjiCek; paket lain kehilangan badge (hanya satu default).</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">3.5</td><td>Kembalikan default ke <b>Premium</b> (edit Premium → centang default → simpan)</td><td class="exp">Badge Default kembali ke Premium saja; Free tanpa badge.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">3.6</td><td>Hapus paket <b>UjiCek</b> (tombol Hapus → OK pada konfirmasi)</td><td class="exp">UjiCek hilang dari tabel.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">3.7</td><td>Coba hapus paket <b>Premium</b> (sedang dipakai toko)</td><td class="exp">Ditolak dengan pesan merah <i>Paket masih dipakai tenant…</i>, paket tetap ada.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">4</span>Daftar toko baru (tenant) <span class="tag">Register</span></h2>
+<p class="why">Pakai email yang belum pernah dipakai agar benar-benar menguji alur pendaftaran.</p>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">4.1</td><td>Logout. Buka <code>/register</code>, isi: Nama Toko <code>Toko Cek Manual</code>, Nama Anda <code>Cek Satu</code>, Email <code>cek1@tokohpx.test</code>, Password <code>rahasia123</code> (dua kali), daftar</td><td class="exp">Langsung masuk ke <b>/tenant/dashboard</b> tanpa perlu login ulang.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">4.2</td><td>Perhatikan sidebar tenant</td><td class="exp">Nama toko <b>Toko Cek Manual</b> tampil di atas sidebar; menu: Dashboard, Inventori, Kasir, Laporan, Panduan, Pengaturan.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">4.3</td><td>Logout, lalu login sebagai superadmin → <b>Kelola Toko</b></td><td class="exp">Baris <b>Toko Cek Manual</b> ada, pemilik <i>Cek Satu</i>, paket <b>Premium</b> (paket default), expired kosong.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">4.4</td><td>Coba buka <code>/superadmin/dashboard</code> saat login sebagai tenant</td><td class="exp">Dialihkan kembali ke dashboard tenant + pesan <i>Anda tidak punya akses…</i></td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">5</span>Tenant — tambah stok &amp; IMEI <span class="tag">Inventori</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">5.1</td><td>Login <code>cek1@tokohpx.test</code> / <code>rahasia123</code> → menu <b>Inventori</b></td><td class="exp">Kartu kuota menampilkan paket <b>Premium</b> dan IMEI terpakai <b>0 / 200</b>, stok mengendap 0.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">5.2</td><td>Klik <b>+ Tambah Stok / IMEI</b>, isi Tipe HP <code>Samsung A15</code>, Brand <code>Samsung</code>, Harga <code>2500000</code>, Tanggal Masuk <b>hari ini</b>, IMEI satu baris <code>111122223333444</code>, simpan</td><td class="exp">Pesan sukses <i>1 IMEI ditambahkan.</i> Tabel menampilkan 1 baris, umur stok <b>0 hari</b>, status <b>Available</b>.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">5.3</td><td>Tambah lagi, isi IMEI <b>tiga baris sekaligus</b>: <code>555566667777888</code> / <code>999900001111222</code> / <code>333344445555666</code>, Tipe HP <code>Oppo A18</code></td><td class="exp">Pesan <i>3 IMEI ditambahkan.</i> Kartu kuota berubah jadi <b>4 / 200</b>.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">5.4</td><td>Ulangi input IMEI <code>111122223333444</code> (duplikat)</td><td class="exp">Pesan <i>0 IMEI ditambahkan. 1 IMEI dilewati (sudah terdaftar).</i> Tidak ada baris ganda.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">5.5</td><td>Isi kotak cari dengan <code>Oppo</code>, klik Cari</td><td class="exp">Hanya baris Oppo A18 yang tampil.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">5.6</td><td>Cari dengan nomor <code>999900001111222</code></td><td class="exp">Hanya baris IMEI tersebut yang tampil. Klik Reset.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">5.7</td><td>Tambah stok dengan Tanggal Masuk <b>45 hari lalu</b> (ubah manual di date picker), IMEI <code>777788889999000</code>, Tipe HP <code>iPhone 13</code></td><td class="exp">Baris itu berwarna <b>merah muda</b>, umur &gt; 30 hari, ada badge <b>Mengendap</b>, dan kartu <i>Stok Mengendap</i> naik jadi 1.</td><td class="res"></td></tr>
+</table>
+<div class="note"><b>Penting:</b> jangan lanjut bila butir 5.7 tidak berwarna merah — fitur Aging Alert belum jalan.</div>
+
+<h2 class="step"><span class="n">6</span>Buka shift laci <span class="tag">Shift</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">6.1</td><td>Klik menu <b>Kasir</b> sebelum membuka shift</td><td class="exp">Dialihkan ke halaman <b>Buka Shift</b> + pesan <i>Buka shift dulu sebelum masuk ke kasir.</i></td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">6.2</td><td>Di halaman Buka Shift, klik tombol nominal cepat <b>200.000</b></td><td class="exp">Angka 200000 otomatis terisi di kolom modal laci.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">6.3</td><td>Klik <b>Buka Shift Sekarang</b></td><td class="exp">Masuk ke halaman Kasir (POS). Pesan sukses menyebut modal Rp 200.000.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">6.4</td><td>Lihat sidebar tenant bagian bawah</td><td class="exp">Muncul kotak <b>Shift Aktif</b> (Modal Rp 200.000 + jam mulai) dan tombol merah <b>Tutup Shift</b>.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">7</span>Kasir POS — cari barang <span class="tag">POS</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">7.1</td><td>Di halaman Kasir, ketik IMEI <code>111122223333444</code> di kolom manual, tekan Enter</td><td class="exp">Muncul kartu <b>Detail HP ditemukan</b>: IMEI, Samsung A15, Rp 2.500.000, status available, umur stok.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">7.2</td><td>Ketik IMEI yang tidak ada, mis. <code>000000000000000</code></td><td class="exp">Pesan merah <i>IMEI … tidak terdaftar di stok toko ini.</i> Tidak ada kartu hasil.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">7.3</td><td>Ketik IMEI dengan tanda hubung: <code>1111-2222-3333-444</code></td><td class="exp">Tetap dikenali dan kartu muncul (tanda hubung diabaikan).</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">7.4</td><td>Buka aplikasi dari HP lewat alamat <b>https</b> di atas (bukan http IP), login tenant baru, buka shift, lalu tekan tombol besar <b>📷 Scan Barcode IMEI</b></td><td class="exp">Browser menanyakan izin kamera → pilih Izinkan → gambar kamera belakang muncul di kotak hitam. Arahkan ke kotak HP: IMEI terisi otomatis.</td><td class="res"></td></tr>
+</table>
+<div class="note"><b>Kalau kamera tetap menolak:</b> pastikan alamat diawali <b>https://</b>. Browser memblokir kamera pada alamat <i>http://</i> selain localhost — ini aturan browser, bukan kerusakan aplikasi.</div>
+
+<h2 class="step pb"><span class="n">8</span>Checkout &amp; popup upsell <span class="tag">Transaksi</span></h2>
+<p class="why">Tahap inti. Perhatikan modal kuning harus muncul <b>sebelum</b> uang diterima.</p>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">8.1</td><td>Scan/ketik IMEI <code>111122223333444</code> sehingga kartu barang muncul</td><td class="exp">Kartu <b>Detail HP ditemukan</b> tampil dengan tombol hijau <b>Checkout / Proses Pembayaran</b>.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">8.2</td><td>Klik tombol <b>Checkout / Proses Pembayaran</b></td><td class="exp">Layar penuh berwarna <b>kuning/oranye</b> menutupi seluruh layar, bertulis: <b>⚠ PERINGATAN KASIR: Tawarkan bundling Anti-Gores &amp; Casing sekarang!</b></td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">8.3</td><td>Periksa dua tombol di bagian bawah modal</td><td class="exp">Ada <b>Kembali (Tambah Item)</b> dan <b>Lanjutkan Pembayaran</b>, keduanya terlihat penuh (tidak terpotong layar).</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">8.4</td><td>Klik <b>Kembali (Tambah Item)</b></td><td class="exp">Modal hilang, kembali ke kasir, kartu barang <b>masih ada</b>. Tidak ada transaksi tercatat.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">8.5</td><td>Klik Checkout lagi, lalu <b>Lanjutkan Pembayaran</b></td><td class="exp">Pesan hijau <i>Transaksi berhasil. Total Rp 2.500.000</i>. Kartu barang hilang, modal tertutup, angka <i>Transaksi terpakai</i> bertambah 1.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">8.6</td><td>Cari lagi IMEI <code>111122223333444</code> yang baru terjual</td><td class="exp">Ditolak dengan pesan <i>Unit ini sudah terjual.</i> — tidak bisa dijual dua kali.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">8.7</td><td>Jual 2 unit lagi: <code>555566667777888</code> dan <code>999900001111222</code></td><td class="exp">Dua transaksi tambahan berhasil. Total 3 transaksi.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">9</span>Tutup shift &amp; cek selisih kas <span class="tag">Anti-Maling</span></h2>
+<p class="why">Di sinilah kecurangan kasir terdeteksi. Hitung uang laci seolah-olah Anda kasir jujur, lalu ulangi dengan angka kurang.</p>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">9.1</td><td>Klik <b>Tutup Shift</b> (di sidebar atau di atas halaman kasir)</td><td class="exp">Halaman Tutup Shift menampilkan: modal awal Rp 200.000, <i>Penjualan shift ini</i>, dan <b>Uang seharusnya (sistem)</b>.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">9.2</td><td>Hitung manual: 200.000 + (2.500.000 + 2.500.000 + 2.500.000) = 7.700.000. Cocokkan angka <i>Uang seharusnya</i> di layar</td><td class="exp">Angka di layar = <b>Rp 7.700.000</b>. Bila beda, catat selisihnya di kolom Catatan.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">9.3</td><td>Isi kolom Uang Fisik dengan <b>7.700.000</b>, perhatikan kotak preview selisih</td><td class="exp">Preview hijau bertulis <i>Selisih: Rp 0</i> dan <i>Pas, tidak ada selisih.</i></td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">9.4</td><td>Ubah angka jadi <b>7.500.000</b></td><td class="exp">Preview berubah <b>merah</b>: <i>Selisih: Rp -200.000 — Uang fisik kurang dari catatan sistem.</i></td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">9.5</td><td>Kembalikan ke <b>7.700.000</b>, klik <b>Tutup Shift</b>, konfirmasi OK</td><td class="exp">Dialihkan ke halaman <b>Laporan Shift</b> + pesan sukses berisi uang fisik, seharusnya, dan selisih.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">9.6</td><td>Di tabel Laporan Shift, periksa baris shift Anda</td><td class="exp">Kolom Uang Awal 200.000 · Penjualan 7.500.000 (3 trx) · Seharusnya 7.700.000 · Uang Fisik 7.700.000 · Selisih <span class="ok">Pas</span>.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">9.7</td><td>Buka lagi menu <b>Kasir</b> setelah shift ditutup</td><td class="exp">Dialihkan ke Buka Shift lagi — kasir terkunci tanpa shift aktif.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">10</span>Laporan penjualan <span class="tag">Laporan</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">10.1</td><td>Buka menu <b>Laporan</b></td><td class="exp">Kartu <b>Hari Ini</b> dan <b>Bulan Ini</b> menampilkan total pemasukan Rp 7.500.000 dan 3 HP terjual.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">10.2</td><td>Periksa tabel rincian di bawahnya</td><td class="exp">3 baris: jam transaksi, tipe HP, IMEI, dan harga masing-masing Rp 2.500.000.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">10.3</td><td>Isi filter <b>Dari</b> = hari ini, <b>Sampai</b> = hari ini, klik Terapkan</td><td class="exp">Tampilan berganti jadi satu bagian <i>Rentang …</i> dengan total Rp 7.500.000 dan 3 baris.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">10.4</td><td>Isi filter tanggal <b>tahun lalu</b>, Terapkan</td><td class="exp">Total Rp 0 dan pesan <i>Belum ada penjualan pada periode ini.</i></td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">10.5</td><td>Klik <b>Reset</b>, lalu buka <b>Laporan Shift</b> dan cek halaman Panduan</td><td class="exp">Semua halaman memuat footer <b>Versi 1.0 (Final)</b> dan tidak ada halaman error.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">11</span>Uji batas limit &amp; masa aktif <span class="tag">Limitasi</span></h2>
+<p class="why">Pastikan sistem benar-benar menolak saat kuota habis — ini pengaman pendapatan Anda.</p>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">11.1</td><td>Login superadmin → Edit paket <b>Premium</b> (paket toko uji Anda) → ubah <b>Limit Total Transaksi</b> menjadi <b>3</b>, simpan</td><td class="exp">Paket Premium kini berlimit 3 transaksi.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.2</td><td>Login tenant <code>cek1@tokohpx.test</code>, buka shift lagi (modal 100.000), cari IMEI tersisa <code>333344445555666</code>, klik Checkout → Lanjutkan Pembayaran</td><td class="exp">Modal kuning menampilkan pesan merah <b>Limit Total Transaksi Anda sudah habis (3 dari 3)</b> + tombol <b>Hubungi Admin via WhatsApp</b>. Transaksi TIDAK terjadi.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.3</td><td>Klik tombol WhatsApp tersebut</td><td class="exp">WhatsApp terbuka dengan pesan siap kirim: <i>Halo Admin, saya ingin Upgrade ke Paket pro</i> (nama paket termurah yang lebih mahal dari paket toko saat ini).</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.4</td><td>Superadmin → Edit paket Premium → kosongkan Limit Transaksi (unlimited), simpan. Lalu Edit toko <b>Toko Cek Manual</b> → isi <b>Expired Date</b> = <b>kemarin</b>, simpan</td><td class="exp">Paket tanpa limit; toko bertanggal expired kemarin.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.5</td><td>Kembali ke kasir tenant, coba checkout unit <code>333344445555666</code></td><td class="exp">Ditolak dengan pesan <b>Masa aktif paket Anda sudah habis pada [tanggal kemarin]</b> + link WhatsApp.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.6</td><td>Superadmin → Edit toko <b>Toko Cek Manual</b> → Expired Date = <b>31-12-2027</b>, simpan</td><td class="exp">Data toko menampilkan tanggal 31 Dec 2027. Ini meniru proses "tenant sudah bayar".</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.7</td><td>Kembali ke kasir tenant, checkout unit <code>333344445555666</code> sekali lagi</td><td class="exp">Transaksi <b>berhasil</b> setelah paket diaktifkan — bukti alur upgrade bekerja.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.8</td><td>Uji limit IMEI: superadmin → Edit paket Premium → Limit Total IMEI = <b>3</b> (padahal toko sudah punya 5 IMEI), simpan. Di tenant, coba tambah 2 IMEI baru</td><td class="exp">Ditolak dengan pesan <b>Limit Total Input IMEI Anda sudah habis. Silakan Upgrade Paket.</b> Tidak ada baris baru.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">11.9</td><td>Kembalikan paket Premium ke kondisi normal: Limit Transaksi <b>500</b>, Limit IMEI <b>200</b>, simpan</td><td class="exp">Paket Premium kembali ke 500/200 seperti semula.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">12</span>Panduan pengguna per role <span class="tag">Dokumentasi</span></h2>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">12.1</td><td>Login sebagai <b>tenant</b> → menu <b>Panduan</b></td><td class="exp">Judul <i>Panduan Pemilik Toko</i>; 4 bagian: menambah stok, camera scanner, buka/tutup shift, upgrade paket. Klik judul untuk buka/tutup.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">12.2</td><td>Login sebagai <b>superadmin</b> → menu <b>Panduan</b></td><td class="exp">Judul <i>Panduan Superadmin</i>; 3 bagian: membuat paket, menyetel WhatsApp, mengaktifkan paket tenant. Isi panduan tenant TIDAK muncul di sini.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">12.3</td><td>Di bagian bawah halaman Panduan, periksa nomor WhatsApp admin</td><td class="exp">Nomor tampil (contoh <code>6281234567890</code>) dan cocok dengan nomor yang Anda pakai untuk menerima chat upgrade.</td><td class="res"></td></tr>
+</table>
+
+<h2 class="step"><span class="n">13</span>Uji tampilan HP &amp; kesiapan produksi <span class="tag">Final</span></h2>
+<p class="why">Langkah terakhir: pastikan nyaman dipakai dari HP, karena kasir memakainya berdiri di depan pelanggan.</p>
+<table>
+  <tr><th></th><th>No</th><th>Langkah yang Anda lakukan</th><th>Hasil yang benar</th><th>Catatan</th></tr>
+  <tr><td class="cb">☐</td><td class="no">13.1</td><td>Buka aplikasi di HP. Geser tiap halaman ke kiri-kanan dengan jari</td><td class="exp">Halaman <b>tidak ikut bergeser</b>. Hanya tabel (kelola paket/toko, inventori, laporan) yang bergeser sendiri di dalam kotaknya — itu memang disengaja.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">13.2</td><td>Tutup layar ke mode potret pendek (atau buka keyboard saat mengisi nominal di modal upsell)</td><td class="exp">Tombol <b>Lanjutkan Pembayaran</b> tetap terlihat atau bisa dijangkau dengan menggulir isi modal. Tidak ada tombol yang tersembunyi di luar layar.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">13.3</td><td>Di HP, tekan tombol menu (☰) di kiri atas</td><td class="exp">Sidebar muncul bergeser dari kiri; mengetuk area gelap menutupnya kembali.</td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">13.4</td><td>Jalankan di terminal: <code>docker exec tokohpx_app php artisan tinker --execute="echo config('app.env').'|'.(config('app.debug')?'on':'off').'|'.config('app.version');"</code></td><td class="exp">Hasil: <code>production|off|1.0 (Final)</code></td><td class="res"></td></tr>
+  <tr><td class="cb">☐</td><td class="no">13.5</td><td>Buka <code>http://localhost:8091</code> saat sudah logout, periksa landing page</td><td class="exp">Tampil normal, tombol <b>Daftar Gratis</b> menuju halaman register, footer <b>Versi 1.0 (Final)</b>.</td><td class="res"></td></tr>
+</table>
+
+<div class="note">
+  <b>Setelah selesai menguji:</b> data uji (toko "Toko Cek Manual", IMEI 111122223333444 dan lainnya, transaksi, shift)
+  masih tersimpan di database. Bila ingin memulai pemakaian nyata dengan data bersih, minta reset database
+  sebelum toko pertama Anda input stok sungguhan.
+</div>
+
+<div class="sign">
+  <h3>Kesimpulan Hasil Uji</h3>
+  <div class="lbl">Jumlah butir lolos / total</div>
+  <div class="line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dari 70 butir — semua lolos ☐&nbsp;&nbsp;&nbsp; ada yang gagal ☐</div>
+  <div class="lbl">Butir yang gagal (nomor) dan gejala yang terlihat</div>
+  <div class="line"></div>
+  <div class="line"></div>
+  <div class="lbl">Keputusan</div>
+  <div class="line">Siap dipakai ☐&nbsp;&nbsp;&nbsp; Perlu perbaikan dulu ☐&nbsp;&nbsp;&nbsp; Tanggal uji: ____ / ____ / ________</div>
+  <div class="lbl">Diuji oleh</div>
+  <div class="line"></div>
+</div>
+
+<div class="sign" style="margin-top:12px">
+  <h3>Klarifikasi User</h3>
+  <div class="lbl">Catatan / koreksi / keputusan tambahan</div>
+  <div class="line"></div>
+  <div class="line"></div>
+  <div class="line"></div>
+  <div class="line"></div>
+</div>
+
+<div class="footer">
+  TokoHPX 1.0 (Final) · Ceklist Verifikasi Manual · 13 tahap · 70 butir · https://github.com/SkillBelajar/toko_hpx
+</div>
+
+</body>
+</html>
