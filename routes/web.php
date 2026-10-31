@@ -10,7 +10,7 @@ use App\Http\Controllers\Tenant\ReportController;
 use App\Http\Controllers\Tenant\ShiftController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => view('welcome'))->name('home');
+Route::view('/', 'welcome')->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

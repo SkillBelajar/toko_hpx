@@ -1,9 +1,14 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: tokohpx_app
     working_dir: /var/www/html
-    command: sh -c "php artisan config:clear && php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=8000"
+    environment:
+      # Override lewat shell: APP_ENV=local docker compose up -d
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
     volumes:
       - .:/var/www/html:cached
       - ./.env:/var/www/html/.env:ro
@@ -14,12 +19,18 @@ services:
         condition: service_started
     networks: [tokohpx]
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   web:
     image: nginx:alpine
     container_name: tokohpx_web
     ports:
-      - "8091:80"
+      - "${APP_PORT:-8091}:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./public:/var/www/html/public:ro
@@ -31,14 +42,14 @@ services:
     image: mysql:8
     container_name: tokohpx_db
     environment:
-      MYSQL_DATABASE: tokohpx
-      MYSQL_USER: tokohpx
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE: ${DB_DATABASE:-tokohpx}
+      MYSQL_USER: ${DB_USERNAME:-tokohpx}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootsecret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
       interval: 5s
       timeout: 3s
       retries: 20

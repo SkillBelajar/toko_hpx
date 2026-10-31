@@ -39,7 +39,7 @@
 
     {{-- Area kamera --}}
     <div x-cloak x-show="scanning" class="mb-4 rounded-2xl border border-slate-200 bg-slate-900 p-3 shadow-lg">
-        <div id="scanner-region" class="overflow-hidden rounded-xl bg-black" style="min-height: 240px;"></div>
+        <div id="scanner-region" class="overflow-hidden rounded-xl bg-black" style="min-height: 220px; max-height: 55vh;"></div>
         <div class="mt-3 flex gap-2">
             <button type="button" @click="stopScan()"
                 class="flex-1 rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white hover:bg-white/20">Tutup Kamera</button>
@@ -93,7 +93,8 @@
     <p class="mt-4 text-center text-[11px] text-slate-400">{{ $stockCount }} unit stok tersedia di toko ini.</p>
 
     {{-- ===== MODAL UPSELL (layar penuh, kuning/oranye) ===== --}}
-    <div x-cloak x-show="upsell" class="fixed inset-0 z-50 flex flex-col bg-amber-400">
+    <div x-cloak x-show="upsell" x-effect="document.body.style.overflow = upsell ? 'hidden' : ''"
+        class="fixed inset-0 z-50 flex flex-col overscroll-contain bg-amber-400">
 
         <div class="flex items-center justify-between border-b-2 border-amber-600/30 px-4 py-3">
             <p class="text-sm font-extrabold uppercase tracking-wide text-amber-950">Pengingat Upsell</p>
@@ -101,7 +102,7 @@
                 x-text="'Rp ' + Number(result?.price_sell || 0).toLocaleString('id-ID')"></span>
         </div>
 
-        <div class="flex flex-1 flex-col items-center justify-center px-5 py-8 text-center">
+        <div class="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-5 py-6 text-center">
             <div class="text-6xl leading-none">⚠️</div>
 
             <h2 class="mt-5 text-2xl font-extrabold uppercase leading-tight tracking-tight text-amber-950 sm:text-3xl">
@@ -127,7 +128,7 @@
             </div>
         </div>
 
-        <div class="space-y-2 border-t-2 border-amber-600/30 p-4">
+        <div class="shrink-0 space-y-2 border-t-2 border-amber-600/30 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <button type="button" @click="closeUpsell()" :disabled="processing"
                 class="w-full rounded-xl border-2 border-amber-950/30 bg-white/60 px-5 py-4 text-base font-bold text-amber-950 hover:bg-white disabled:opacity-60">
                 Kembali (Tambah Item)

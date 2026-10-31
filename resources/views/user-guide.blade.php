@@ -14,7 +14,7 @@
             {{ $isSuperadmin ? 'Mengelola paket & toko yang berlangganan' : 'Menjalankan kasir, stok, dan shift toko' }}
         </h2>
         <p class="mt-1 text-sm text-slate-600">
-            Versi aplikasi {{ config('app.version', '0.20') }}. Ikuti urutan langkah di bawah.
+            Versi aplikasi {{ config('app.version', '1.0 (Final)') }}. Ikuti urutan langkah di bawah.
         </p>
     </div>
 
