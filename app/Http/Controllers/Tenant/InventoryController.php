@@ -46,6 +46,74 @@ class InventoryController extends Controller
         ]);
     }
 
+    public function edit(Request $request, Inventory $inventory): View|RedirectResponse
+    {
+        $tenant = $request->user()->tenant;
+
+        abort_unless($inventory->tenant_id === $tenant?->id, 403);
+
+        return view('tenant.inventory.edit', [
+            'inventory' => $inventory->load('product'),
+            'tenant' => $tenant,
+        ]);
+    }
+
+    public function update(Request $request, Inventory $inventory): RedirectResponse
+    {
+        $tenant = $request->user()->tenant;
+
+        abort_unless($inventory->tenant_id === $tenant?->id, 403);
+
+        $data = $request->validate([
+            'tipe_hp'     => ['required', 'string', 'max:120'],
+            'brand'       => ['nullable', 'string', 'max:80'],
+            'price_sell'  => ['required', 'integer', 'min:0'],
+            'entry_date'  => ['required', 'date'],
+        ]);
+
+        DB::transaction(function () use ($inventory, $data) {
+            $product = $inventory->product;
+            $product->update([
+                'tipe_hp'    => $data['tipe_hp'],
+                'brand'      => $data['brand'] ?: null,
+                'price_sell' => $data['price_sell'],
+            ]);
+
+            $inventory->update([
+                'entry_date' => $data['entry_date'],
+            ]);
+        });
+
+        return redirect()
+            ->route('tenant.inventory.index')
+            ->with('status', 'Stok berhasil diperbarui.');
+    }
+
+    public function destroy(Request $request, Inventory $inventory): RedirectResponse
+    {
+        $tenant = $request->user()->tenant;
+
+        abort_unless($inventory->tenant_id === $tenant?->id, 403);
+
+        $productId = $inventory->product_id;
+        $wasAvailable = $inventory->status === Inventory::STATUS_AVAILABLE;
+
+        $inventory->delete();
+
+        // Hapus product jika tidak punya inventory lagi.
+        if (! Inventory::where('product_id', $productId)->exists()) {
+            Product::destroy($productId);
+        }
+
+        $msg = $wasAvailable
+            ? 'Stok berhasil dihapus.'
+            : 'Riwayat transaksi berhasil dihapus.';
+
+        return redirect()
+            ->route('tenant.inventory.index')
+            ->with('status', $msg);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $tenant = $request->user()->tenant;
@@ -53,16 +121,15 @@ class InventoryController extends Controller
         abort_unless($tenant, 403, 'Akun Anda belum terhubung ke toko.');
 
         $data = $request->validate([
-            'tipe_hp' => ['required', 'string', 'max:120'],
-            'brand' => ['nullable', 'string', 'max:80'],
+            'tipe_hp'    => ['required', 'string', 'max:120'],
+            'brand'      => ['nullable', 'string', 'max:80'],
             'price_sell' => ['required', 'integer', 'min:0'],
-            'imei' => ['required', 'string'],
+            'imei'       => ['required', 'string'],
             'entry_date' => ['nullable', 'date'],
         ], [
             'imei.required' => 'Minimal isi satu nomor IMEI.',
         ]);
 
-        // Satu field teks bisa berisi banyak IMEI: pisah baris / koma / spasi.
         $imeis = collect(preg_split('/[\s,;]+/', $data['imei']))
             ->map(fn ($v) => preg_replace('/\D/', '', $v))
             ->filter(fn ($v) => $v !== '')
@@ -73,7 +140,6 @@ class InventoryController extends Controller
             return back()->withInput()->withErrors(['imei' => 'Nomor IMEI tidak valid.']);
         }
 
-        // ---- validasi limit total IMEI paket ----
         $limit = $tenant->imeiLimit();
         $used = $tenant->imeiUsed();
 
@@ -101,10 +167,10 @@ class InventoryController extends Controller
                 }
 
                 Inventory::create([
-                    'tenant_id' => $tenant->id,
+                    'tenant_id'  => $tenant->id,
                     'product_id' => $product->id,
-                    'imei' => $imei,
-                    'status' => Inventory::STATUS_AVAILABLE,
+                    'imei'       => $imei,
+                    'status'     => Inventory::STATUS_AVAILABLE,
                     'entry_date' => $data['entry_date'] ?? now()->toDateString(),
                 ]);
 

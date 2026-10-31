@@ -136,6 +136,7 @@
                     <th class="whitespace-nowrap px-4 py-3 font-semibold">Tanggal Masuk</th>
                     <th class="whitespace-nowrap px-4 py-3 font-semibold">Umur Stok</th>
                     <th class="whitespace-nowrap px-4 py-3 font-semibold">Status</th>
+                    <th class="whitespace-nowrap px-4 py-3 font-semibold text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -168,10 +169,25 @@
                                 <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">Sold</span>
                             @endif
                         </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-center">
+                            <a href="{{ route('tenant.inventory.edit', $item) }}"
+                                class="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
+                                Edit
+                            </a>
+                            <form method="POST" action="{{ route('tenant.inventory.destroy', $item) }}" class="inline"
+                                onsubmit="return confirm('Hapus IMEI {{ $item->imei }}?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100">
+                                    Hapus
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                        <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">
                             {{ $search !== '' ? 'Tidak ada stok yang cocok dengan pencarian.' : 'Belum ada stok. Tambahkan IMEI pertama Anda.' }}
                         </td>
                     </tr>
