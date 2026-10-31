@@ -29,9 +29,20 @@
                 <dt class="text-slate-500">Modal laci awal</dt>
                 <dd class="font-semibold text-slate-800">Rp {{ number_format((float) $shift->opening_amount, 0, ',', '.') }}</dd>
             </div>
+            <div class="flex justify-between">
+                <dt class="text-slate-500">Penjualan shift ini</dt>
+                <dd class="font-semibold text-slate-800">
+                    Rp {{ number_format((float) $totalSales, 0, ',', '.') }}
+                    <span class="text-xs font-normal text-slate-500">({{ $trxCount }} transaksi)</span>
+                </dd>
+            </div>
+            <div class="flex justify-between border-t border-slate-200 pt-2">
+                <dt class="font-semibold text-slate-700">Uang seharusnya (sistem)</dt>
+                <dd class="font-bold text-slate-900">Rp {{ number_format((float) $expectedAmount, 0, ',', '.') }}</dd>
+            </div>
         </dl>
 
-        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4"
+        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4" x-data="{ closing: {{ (int) old('closing_amount', 0) }}, expected: {{ (int) $expectedAmount }} }"
             onsubmit="return confirm('Tutup shift sekarang? Shift yang sudah ditutup tidak bisa dibuka kembali.')">
             @csrf
             @method('PUT')
@@ -41,11 +52,23 @@
                 <div class="relative mt-1">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-sm font-semibold text-slate-400">Rp</span>
                     <input id="closing_amount" name="closing_amount" type="number" inputmode="numeric" min="0" step="1000"
-                        required autofocus value="{{ old('closing_amount') }}"
+                        required autofocus x-model.number="closing" value="{{ old('closing_amount') }}"
                         class="block w-full rounded-xl border border-slate-300 py-4 pl-12 pr-4 text-2xl font-bold tracking-tight text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
                         placeholder="0">
                 </div>
                 @error('closing_amount') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- Preview selisih langsung --}}
+            <div class="rounded-xl border px-4 py-3 text-sm"
+                :class="(closing - expected) < 0 ? 'border-red-200 bg-red-50 text-red-700' : ((closing - expected) > 0 ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-emerald-200 bg-emerald-50 text-emerald-700')">
+                <p class="font-semibold">
+                    Selisih:
+                    <span x-text="'Rp ' + (closing - expected).toLocaleString('id-ID')"></span>
+                </p>
+                <p class="mt-0.5 text-xs" x-show="(closing - expected) < 0">Uang fisik kurang dari catatan sistem.</p>
+                <p class="mt-0.5 text-xs" x-show="(closing - expected) > 0">Uang fisik lebih dari catatan sistem.</p>
+                <p class="mt-0.5 text-xs" x-show="(closing - expected) === 0">Pas, tidak ada selisih.</p>
             </div>
 
             <button type="submit"
@@ -61,7 +84,7 @@
     </div>
 
     <p class="mt-4 text-center text-xs text-slate-500">
-        Expected amount &amp; selisih kas dihitung otomatis setelah modul transaksi aktif.
+        Uang seharusnya = modal awal + seluruh penjualan shift ini. Selisih di luar 0 dicatat sebagai temuan kas.
     </p>
 </div>
 @endsection

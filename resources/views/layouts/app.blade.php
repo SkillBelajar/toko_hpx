@@ -51,7 +51,7 @@
     <footer class="border-t border-slate-200 bg-slate-50">
         <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}. Semua hak dilindungi.</p>
-            <p class="font-bold text-slate-800">Versi {{ config('app.version', '0.19') }}</p>
+            <p class="font-bold text-slate-800">Versi {{ config('app.version', '0.20') }}</p>
         </div>
     </footer>
 

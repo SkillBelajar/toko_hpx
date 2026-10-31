@@ -4,7 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\TenantController;
 use App\Http\Controllers\Tenant\InventoryController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\Tenant\PosController;
+use App\Http\Controllers\Tenant\ReportController;
 use App\Http\Controllers\Tenant\ShiftController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +36,7 @@ Route::middleware(['auth', 'role:superadmin'])
         Route::put('/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
 
         Route::view('/settings', 'superadmin.settings')->name('settings');
+        Route::get('/guide', [GuideController::class, 'index'])->name('guide');
     });
 
 Route::middleware(['auth', 'role:tenant'])
@@ -58,6 +61,8 @@ Route::middleware(['auth', 'role:tenant'])
             Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
         });
 
-        Route::view('/reports', 'tenant.placeholder')->name('reports');
+        Route::get('/reports', [ReportController::class, 'sales'])->name('reports');
+        Route::get('/reports/shifts', [ReportController::class, 'shifts'])->name('reports.shifts');
+        Route::get('/guide', [GuideController::class, 'index'])->name('guide');
         Route::view('/settings', 'tenant.placeholder')->name('settings');
     });

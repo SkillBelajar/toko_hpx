@@ -31,7 +31,8 @@
                     ['label' => 'Dashboard', 'route' => 'tenant.dashboard', 'active' => request()->routeIs('tenant.dashboard')],
                     ['label' => 'Inventori', 'route' => 'tenant.inventory.index', 'active' => request()->routeIs('tenant.inventory.*')],
                     ['label' => 'Kasir', 'route' => 'tenant.pos.index', 'active' => request()->routeIs('tenant.pos.*')],
-                    ['label' => 'Laporan', 'route' => 'tenant.reports', 'active' => request()->routeIs('tenant.reports')],
+                    ['label' => 'Laporan', 'route' => 'tenant.reports', 'active' => request()->routeIs('tenant.reports', 'tenant.reports.shifts')],
+                    ['label' => 'Panduan', 'route' => 'tenant.guide', 'active' => request()->routeIs('tenant.guide')],
                     ['label' => 'Pengaturan', 'route' => 'tenant.settings', 'active' => request()->routeIs('tenant.settings')],
                 ];
             @endphp
@@ -72,7 +73,7 @@
                     Keluar
                 </button>
             </form>
-            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.19') }}</p>
+            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.20') }}</p>
         </div>
     </aside>
 
@@ -105,7 +106,7 @@
         <footer class="border-t border-slate-200 bg-white px-4 py-4 text-xs text-slate-500 sm:px-6">
             <div class="flex items-center justify-between">
                 <span>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}</span>
-                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.19') }}</span>
+                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.20') }}</span>
             </div>
         </footer>
     </div>

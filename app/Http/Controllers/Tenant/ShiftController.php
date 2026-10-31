@@ -55,7 +55,12 @@ class ShiftController extends Controller
             return redirect()->route('tenant.shift.open');
         }
 
-        return view('tenant.shift.close', ['shift' => $shift]);
+        return view('tenant.shift.close', [
+            'shift' => $shift,
+            'expectedAmount' => $this->expectedAmount($shift),
+            'totalSales' => (int) $shift->transactions()->sum('total_price'),
+            'trxCount' => $shift->transactions()->count(),
+        ]);
     }
 
     public function update(Request $request): RedirectResponse
@@ -72,15 +77,25 @@ class ShiftController extends Controller
             'closing_amount.required' => 'Uang fisik laci akhir wajib diisi.',
         ]);
 
-        // expected_amount & variance disempurnakan di Slice 6/7 setelah transaksi berjalan.
+        // expected = modal awal + semua transaksi selama shift; variance = fisik - expected.
+        $expected = $this->expectedAmount($shift);
+
         $shift->update([
             'closing_amount' => $data['closing_amount'],
-            'expected_amount' => $shift->opening_amount,
-            'variance' => (float) $data['closing_amount'] - (float) $shift->opening_amount,
+            'expected_amount' => $expected,
+            'variance' => (float) $data['closing_amount'] - (float) $expected,
             'closed_at' => now(),
         ]);
 
-        return redirect()->route('tenant.shift.open')
-            ->with('status', 'Shift ditutup. Uang fisik laci Rp '.number_format($data['closing_amount'], 0, ',', '.').'.');
+        return redirect()->route('tenant.reports.shifts')
+            ->with('status', 'Shift ditutup. Uang fisik laci Rp '.number_format($data['closing_amount'], 0, ',', '.')
+                .' · seharusnya Rp '.number_format($expected, 0, ',', '.')
+                .' · selisih Rp '.number_format((float) $data['closing_amount'] - (float) $expected, 0, ',', '.').'.');
+    }
+
+    /** expected_amount = opening_amount + total transaksi shift ini. */
+    private function expectedAmount(CashShift $shift): float
+    {
+        return (float) $shift->opening_amount + (float) $shift->transactions()->sum('total_price');
     }
 }
