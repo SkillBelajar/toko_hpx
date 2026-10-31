@@ -132,44 +132,68 @@
             </p>
         </div>
 
-        <div class="mt-10 grid gap-6 sm:grid-cols-2">
-            <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                <h3 class="text-lg font-bold text-slate-900">Free</h3>
-                <p class="mt-1 text-sm text-slate-500">Untuk toko yang baru mulai.</p>
-                <p class="mt-6 flex items-baseline gap-1">
-                    <span class="text-4xl font-extrabold tracking-tight text-slate-900">Rp 0</span>
-                    <span class="text-sm text-slate-500">/bulan</span>
-                </p>
-                <ul class="mt-6 space-y-3 text-sm text-slate-600">
-                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Limit Total Transaksi: <strong class="text-slate-900">30</strong></li>
-                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Limit Stok: <strong class="text-slate-900">50</strong> unit</li>
-                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Scan IMEI, shift kasir, laporan dasar</li>
-                </ul>
-                <a href="{{ route('register') }}" class="mt-8 rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50">Mulai Gratis</a>
-            </div>
-
-            <div class="relative flex flex-col rounded-2xl border-2 border-indigo-600 bg-white p-6 shadow-xl shadow-indigo-600/10 sm:p-8">
+        @if($landingPackages->count())
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-{{ max(2, $landingPackages->count()) }}">
+            @foreach($landingPackages as $pkg)
+            <div class="relative flex flex-col rounded-2xl border-2 border-indigo-600 bg-white p-6 shadow-xl shadow-indigo-600/10 sm:p-8 @if(!$pkg['is_default']) border-slate-200 shadow-none @endif">
+                @if($pkg['is_default'])
                 <span class="absolute -top-3 right-6 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white">Paling Populer</span>
-                <h3 class="text-lg font-bold text-slate-900">Pro</h3>
-                <p class="mt-1 text-sm text-slate-500">Untuk toko yang sudah jalan harian.</p>
+                @endif
+                <h3 class="text-lg font-bold text-slate-900">{{ $pkg['name'] }}</h3>
+                <p class="mt-1 text-sm text-slate-500">
+                    {{ $pkg['price'] == 0 ? 'Untuk toko yang baru mulai.' : 'Untuk toko yang sudah jalan harian.' }}
+                </p>
                 <p class="mt-6 flex items-baseline gap-1">
-                    <span class="text-4xl font-extrabold tracking-tight text-slate-900">Rp 90.000</span>
+                    <span class="text-4xl font-extrabold tracking-tight text-slate-900">
+                        {{ $pkg['price'] == 0 ? 'Gratis' : 'Rp ' . number_format($pkg['price'], 0, ',', '.') }}
+                    </span>
+                    @if($pkg['price'] > 0)
                     <span class="text-sm text-slate-500">/bulan</span>
+                    @endif
                 </p>
                 <ul class="mt-6 space-y-3 text-sm text-slate-600">
-                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Transaksi: <strong class="text-slate-900">Unlimited</strong></li>
-                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Stok: <strong class="text-slate-900">Unlimited</strong></li>
+                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span>
+                        Limit Transaksi:
+                        <strong class="text-slate-900">
+                            @if($pkg['trx_limit'])
+                                {{ number_format($pkg['trx_limit'], 0, ',', '.') }}
+                            @else
+                                Unlimited
+                            @endif
+                        </strong>
+                    </li>
+                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span>
+                        Limit Stok:
+                        <strong class="text-slate-900">
+                            @if($pkg['imei_limit'])
+                                {{ number_format($pkg['imei_limit'], 0, ',', '.') }} unit
+                            @else
+                                Unlimited
+                            @endif
+                        </strong>
+                    </li>
+                    @if($pkg['price'] > 0)
                     <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Peringatan stok mengendap &amp; pengingat upsell</li>
                     <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Multi-kasir dengan rekap selisih per shift</li>
+                    @endif
+                    @if($pkg['price'] == 0)
+                    <li class="flex gap-2"><span class="text-indigo-600">&#10003;</span> Scan IMEI, shift kasir, laporan dasar</li>
+                    @endif
                 </ul>
-                <a href="{{ route('register') }}" class="mt-8 rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">Pilih Pro</a>
+                <a href="{{ route('register') }}"
+                   class="mt-8 rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-lg transition
+                          {{ $pkg['is_default'] ? 'bg-indigo-600 text-white shadow-indigo-600/20 hover:bg-indigo-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-50' }}">
+                    {{ $pkg['price'] == 0 ? 'Mulai Gratis' : 'Pilih ' . $pkg['name'] }}
+                </a>
             </div>
+            @endforeach
         </div>
+        @endif
 
         <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <strong>Penting soal kuota:</strong> limit transaksi dan stok adalah akumulasi total (seumur hidup akun),
-            bukan reset tiap bulan. Paket Free cocok untuk uji coba; setelah total 30 transaksi tercapai,
-            akun perlu upgrade ke Pro untuk melanjutkan.
+            bukan reset tiap bulan. Paket Free cocok untuk uji coba; setelah kuota tercapai,
+            akun perlu upgrade ke paket yang lebih tinggi untuk melanjutkan.
         </p>
     </div>
 </section>

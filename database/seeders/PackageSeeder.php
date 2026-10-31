@@ -28,5 +28,16 @@ class PackageSeeder extends Seeder
                 'is_default' => false,
             ],
         );
+
+        // Paket Premium (bisa diedit/dihapus superadmin)
+        Package::updateOrCreate(
+            ['name' => 'Premium'],
+            [
+                'price' => 150000,
+                'total_transaction_limit' => 500,
+                'total_imei_limit' => 200,
+                'is_default' => false,
+            ],
+        );
     }
 }
