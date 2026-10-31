@@ -159,7 +159,7 @@ class PosController extends Controller
 
     private function upgradeWaLink($tenant, $upgrade = null): string
     {
-        $admin = config('services.whatsapp.admin', '6281234567890');
+        $admin = config('services.whatsapp.admin', '089696380422');
         $text = $this->upgradeWaText($tenant, $upgrade);
 
         return 'https://wa.me/'.preg_replace('/\D/', '', $admin).'?text='.rawurlencode($text);

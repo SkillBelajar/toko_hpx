@@ -18,9 +18,13 @@
             </span>
 
             <h1 class="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-                Sistem Kasir &amp; Kelola Stok Toko HP
+                Sistem Kasir &amp; Kelola Stok Toko HP<br>
                 <span class="bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent">Cukup Pakai Kamera HP Anda</span>
             </h1>
+
+            <p class="mt-3 text-sm font-semibold text-indigo-700">
+                &#128222; tokohp.pawandigital.id
+            </p>
 
             <p class="mt-5 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
                 Catat penjualan HP dalam hitungan detik: scan IMEI langsung dari kamera, stok terpotong otomatis,
