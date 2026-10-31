@@ -43,6 +43,11 @@ class Tenant extends Model
         return $this->hasMany(Inventory::class);
     }
 
+    public function cashShifts(): HasMany
+    {
+        return $this->hasMany(CashShift::class);
+    }
+
     /** Batas total IMEI paket; null = unlimited. */
     public function imeiLimit(): ?int
     {

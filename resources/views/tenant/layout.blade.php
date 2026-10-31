@@ -29,7 +29,7 @@
                 $items = [
                     ['label' => 'Dashboard', 'route' => 'tenant.dashboard', 'active' => request()->routeIs('tenant.dashboard')],
                     ['label' => 'Inventori', 'route' => 'tenant.inventory.index', 'active' => request()->routeIs('tenant.inventory.*')],
-                    ['label' => 'Kasir', 'route' => 'tenant.cashier', 'active' => request()->routeIs('tenant.cashier')],
+                    ['label' => 'Kasir', 'route' => 'tenant.pos.index', 'active' => request()->routeIs('tenant.pos.*')],
                     ['label' => 'Laporan', 'route' => 'tenant.reports', 'active' => request()->routeIs('tenant.reports')],
                     ['label' => 'Pengaturan', 'route' => 'tenant.settings', 'active' => request()->routeIs('tenant.settings')],
                 ];
@@ -48,13 +48,30 @@
         </nav>
 
         <div class="absolute bottom-0 left-0 right-0 border-t border-white/10 p-3">
+            @php $activeShift = auth()->user()->activeShift(); @endphp
+            @if ($activeShift)
+                <div class="mb-2 rounded-xl bg-emerald-500/10 px-3 py-2">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Shift Aktif</p>
+                    <p class="text-xs text-slate-300">Modal Rp {{ number_format((float) $activeShift->opening_amount, 0, ',', '.') }}</p>
+                    <p class="mt-0.5 text-[11px] text-slate-400">Sejak {{ $activeShift->opened_at->format('d M H:i') }}</p>
+                </div>
+                <a href="{{ route('tenant.shift.close') }}"
+                    class="mb-2 block w-full rounded-xl bg-red-600 px-3 py-2 text-center text-xs font-bold text-white hover:bg-red-700">
+                    Tutup Shift
+                </a>
+            @else
+                <a href="{{ route('tenant.shift.open') }}"
+                    class="mb-2 block w-full rounded-xl bg-emerald-600 px-3 py-2 text-center text-xs font-bold text-white hover:bg-emerald-700">
+                    Buka Shift
+                </a>
+            @endif
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full rounded-xl border border-white/15 px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-white/5">
                     Keluar
                 </button>
             </form>
-            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.17') }}</p>
+            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.18') }}</p>
         </div>
     </aside>
 
@@ -87,7 +104,7 @@
         <footer class="border-t border-slate-200 bg-white px-4 py-4 text-xs text-slate-500 sm:px-6">
             <div class="flex items-center justify-between">
                 <span>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}</span>
-                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.17') }}</span>
+                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.18') }}</span>
             </div>
         </footer>
     </div>

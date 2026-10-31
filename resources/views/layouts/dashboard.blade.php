@@ -43,7 +43,7 @@
     <footer class="border-t border-slate-200 bg-white">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-slate-500 sm:px-6">
             <span>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}</span>
-            <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.17') }}</span>
+            <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.18') }}</span>
         </div>
     </footer>
 
