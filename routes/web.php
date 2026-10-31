@@ -55,6 +55,7 @@ Route::middleware(['auth', 'role:tenant'])
         Route::middleware('shift')->group(function () {
             Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
             Route::get('/pos/lookup', [PosController::class, 'lookup'])->name('pos.lookup');
+            Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
         });
 
         Route::view('/reports', 'tenant.placeholder')->name('reports');

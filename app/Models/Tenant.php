@@ -48,6 +48,43 @@ class Tenant extends Model
         return $this->hasMany(CashShift::class);
     }
 
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /** Batas total transaksi paket; null = unlimited. */
+    public function transactionLimit(): ?int
+    {
+        return $this->package?->total_transaction_limit;
+    }
+
+    public function transactionUsed(): int
+    {
+        return $this->transactions()->count();
+    }
+
+    public function transactionLimitReached(): bool
+    {
+        $limit = $this->transactionLimit();
+
+        return $limit !== null && $this->transactionUsed() >= $limit;
+    }
+
+    /** Paket masih aktif? (tanpa expired_date dianggap aktif) */
+    public function packageActive(): bool
+    {
+        return $this->expired_date === null || $this->expired_date->isFuture() || $this->expired_date->isToday();
+    }
+
+    /** Paket satu tingkat di atas paket sekarang (untuk pesan upgrade WA). */
+    public function upgradePackage(): ?Package
+    {
+        return Package::where('price', '>', (int) ($this->package?->price ?? 0))
+            ->orderBy('price')
+            ->first();
+    }
+
     /** Batas total IMEI paket; null = unlimited. */
     public function imeiLimit(): ?int
     {

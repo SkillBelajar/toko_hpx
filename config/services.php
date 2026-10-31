@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        // Nomor admin/superadmin untuk link upgrade paket (format 62xxx).
+        'admin' => env('WA_ADMIN_NUMBER', '6281234567890'),
+    ],
+
 ];

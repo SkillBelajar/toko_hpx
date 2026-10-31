@@ -55,7 +55,7 @@
                     Keluar
                 </button>
             </form>
-            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.18') }}</p>
+            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.19') }}</p>
         </div>
     </aside>
 
@@ -89,7 +89,7 @@
         <footer class="border-t border-slate-200 bg-white px-4 py-4 text-xs text-slate-500 sm:px-6">
             <div class="flex items-center justify-between">
                 <span>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}</span>
-                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.18') }}</span>
+                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.19') }}</span>
             </div>
         </footer>
     </div>

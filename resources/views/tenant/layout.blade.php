@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — {{ config('app.name', 'TokoHPX') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -71,7 +72,7 @@
                     Keluar
                 </button>
             </form>
-            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.18') }}</p>
+            <p class="mt-3 px-1 text-[11px] text-slate-500">Versi {{ config('app.version', '0.19') }}</p>
         </div>
     </aside>
 
@@ -104,7 +105,7 @@
         <footer class="border-t border-slate-200 bg-white px-4 py-4 text-xs text-slate-500 sm:px-6">
             <div class="flex items-center justify-between">
                 <span>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}</span>
-                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.18') }}</span>
+                <span class="font-bold text-slate-800">Versi {{ config('app.version', '0.19') }}</span>
             </div>
         </footer>
     </div>
