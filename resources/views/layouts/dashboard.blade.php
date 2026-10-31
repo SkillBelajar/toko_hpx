@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Dashboard') — {{ config('app.name', 'TokoHPX') }}</title>
+    <title>@yield('title', 'Dashboard') — {{ config('app.name', 'PawanDigita') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="flex min-h-full flex-col bg-slate-50 font-sans text-slate-800 antialiased">
@@ -12,7 +12,7 @@
         <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
             <a href="/" class="flex items-center gap-2 font-bold text-slate-900">
                 <span class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 text-white">TH</span>
-                <span class="hidden sm:inline">TokoHP<span class="text-indigo-600">X</span></span>
+                <span class="hidden sm:inline">PawanDigita</span>
             </a>
 
             <div class="flex items-center gap-3 text-sm">
@@ -42,7 +42,7 @@
 
     <footer class="border-t border-slate-200 bg-white">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-slate-500 sm:px-6">
-            <span>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}</span>
+            <span>&copy; {{ date('Y') }} {{ config('app.name', 'PawanDigita') }}</span>
             <span class="font-bold text-slate-800">Versi {{ config('app.version', '1.0 (Final)') }}</span>
         </div>
     </footer>

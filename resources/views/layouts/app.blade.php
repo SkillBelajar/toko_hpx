@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', config('app.name', 'TokoHPX'))</title>
+    <title>@yield('title', config('app.name', 'PawanDigita'))</title>
     <meta name="description" content="@yield('description', 'SaaS POS untuk toko HP: kasir cepat, kelola stok & IMEI, anti kecurangan kasir.')">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -13,7 +13,7 @@
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
             <a href="/" class="flex items-center gap-2 font-bold text-slate-900">
                 <span class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 text-white">TH</span>
-                <span class="text-lg">TokoHP<span class="text-indigo-600">X</span></span>
+                <span class="text-lg">PawanDigita</span>
             </a>
 
             <nav x-data="{ open: false }" class="relative">
@@ -50,7 +50,7 @@
 
     <footer class="border-t border-slate-200 bg-slate-50">
         <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p>&copy; {{ date('Y') }} {{ config('app.name', 'TokoHPX') }}. Semua hak dilindungi.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'PawanDigita') }}. Semua hak dilindungi.</p>
             <p class="font-bold text-slate-800">Versi {{ config('app.version', '1.0 (Final)') }}</p>
         </div>
     </footer>

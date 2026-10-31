@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'PawanDigita'),
 
     // Versi aplikasi, dipakai di footer semua layout.
     'version' => env('APP_VERSION', '1.0 (Final)'),

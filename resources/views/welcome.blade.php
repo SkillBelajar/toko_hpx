@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'TokoHPX — Sistem Kasir & Kelola Stok Toko HP')
+@section('title', 'PawanDigita — Sistem Kasir & Kelola Stok Toko HP')
 @section('description', 'SaaS POS untuk toko HP: scan IMEI pakai kamera HP, anti kecurangan kasir dengan shift, dan notifikasi stok mengendap.')
 
 @section('content')
