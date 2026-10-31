@@ -65,22 +65,44 @@ class InventoryController extends Controller
         abort_unless($inventory->tenant_id === $tenant?->id, 403);
 
         $data = $request->validate([
+            'imei'        => ['required', 'string'],
             'tipe_hp'     => ['required', 'string', 'max:120'],
             'brand'       => ['nullable', 'string', 'max:80'],
             'price_sell'  => ['required', 'integer', 'min:0'],
             'entry_date'  => ['required', 'date'],
+        ], [
+            'imei.required' => 'Nomor IMEI wajib diisi.',
         ]);
 
-        DB::transaction(function () use ($inventory, $data) {
-            $product = $inventory->product;
-            $product->update([
-                'tipe_hp'    => $data['tipe_hp'],
-                'brand'      => $data['brand'] ?: null,
-                'price_sell' => $data['price_sell'],
-            ]);
+        $imei = preg_replace('/\D/', '', $data['imei']);
+
+        if (strlen($imei) < 6 || strlen($imei) > 17) {
+            return back()->withInput()->withErrors(['imei' => 'IMEI harus berupa 6-17 digit angka.']);
+        }
+
+        // IMEI unik per tenant.
+        $dup = Inventory::where('tenant_id', $tenant?->id)
+            ->where('imei', $imei)
+            ->whereKeyNot($inventory->id)
+            ->exists();
+
+        if ($dup) {
+            return back()->withInput()->withErrors(['imei' => 'IMEI ini sudah ada di stok toko Anda.']);
+        }
+
+        DB::transaction(function () use ($inventory, $data, $imei) {
+            if ($inventory->status === Inventory::STATUS_AVAILABLE) {
+                $inventory->update(['imei' => $imei]);
+            }
 
             $inventory->update([
                 'entry_date' => $data['entry_date'],
+            ]);
+
+            $inventory->product->update([
+                'tipe_hp'    => $data['tipe_hp'],
+                'brand'      => $data['brand'] ?: null,
+                'price_sell' => $data['price_sell'],
             ]);
         });
 
@@ -98,20 +120,27 @@ class InventoryController extends Controller
         $productId = $inventory->product_id;
         $wasAvailable = $inventory->status === Inventory::STATUS_AVAILABLE;
 
-        $inventory->delete();
-
-        // Hapus product jika tidak punya inventory lagi.
-        if (! Inventory::where('product_id', $productId)->exists()) {
-            Product::destroy($productId);
+        // Unit yang sudah terjual tidak boleh dihapus: menghapusnya ikut menghapus
+        // record transaksi (FK cascade) dan membuat laporan shift/omzet jadi salah.
+        if (! $wasAvailable && $inventory->transaction()->exists()) {
+            return back()->with('error',
+                'Unit ini sudah terjual dan punya riwayat transaksi. '
+                .'Hapus hanya berlaku untuk stok yang masih tersedia.'
+            );
         }
 
-        $msg = $wasAvailable
-            ? 'Stok berhasil dihapus.'
-            : 'Riwayat transaksi berhasil dihapus.';
+        DB::transaction(function () use ($inventory, $productId) {
+            $inventory->delete();
+
+            // Hapus product jika tidak punya inventory lagi.
+            if (! Inventory::where('product_id', $productId)->exists()) {
+                Product::destroy($productId);
+            }
+        });
 
         return redirect()
             ->route('tenant.inventory.index')
-            ->with('status', $msg);
+            ->with('status', 'Stok berhasil dihapus.');
     }
 
     public function store(Request $request): RedirectResponse

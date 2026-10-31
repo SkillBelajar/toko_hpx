@@ -55,9 +55,18 @@
                     @error('entry_date') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="rounded-xl bg-slate-50 px-4 py-3 text-sm">
-                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">IMEI (tidak bisa diubah)</span>
-                    <p class="mt-1 font-mono text-sm font-semibold text-slate-900">{{ $inventory->imei }}</p>
+                <div class="rounded-xl bg-slate-50 px-4 py-3">
+                    <label for="imei" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">IMEI</label>
+                    <input id="imei" name="imei" type="text" required inputmode="numeric"
+                        value="{{ old('imei', $inventory->imei) }}"
+                        @if($inventory->status === 'sold') disabled @endif
+                        class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-mono text-sm font-semibold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:bg-slate-100 disabled:text-slate-500">
+                    @if($inventory->status === 'sold')
+                        <p class="mt-1 text-xs text-slate-500">IMEI unit terjual dikunci agar riwayat transaksi tetap utuh.</p>
+                    @else
+                        <p class="mt-1 text-xs text-slate-500">Salah ketik? Perbaiki di sini, maksimal 15 digit angka.</p>
+                    @endif
+                    @error('imei') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="flex flex-col gap-3 sm:flex-row">

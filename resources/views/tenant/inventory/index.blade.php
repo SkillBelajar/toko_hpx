@@ -174,6 +174,7 @@
                                 class="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
                                 Edit
                             </a>
+                            @if ($item->status === 'available')
                             <form method="POST" action="{{ route('tenant.inventory.destroy', $item) }}" class="inline"
                                 onsubmit="return confirm('Hapus IMEI {{ $item->imei }}?');">
                                 @csrf
@@ -183,6 +184,9 @@
                                     Hapus
                                 </button>
                             </form>
+                            @else
+                                <span class="text-[11px] text-slate-400" title="Unit terjual punya riwayat transaksi, tidak bisa dihapus.">terkunci</span>
+                            @endif
                         </td>
                     </tr>
                 @empty
