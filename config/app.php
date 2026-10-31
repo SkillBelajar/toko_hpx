@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'PawanDigita'),
+    'name' => env('APP_NAME', 'Toko HP Toko HP'),
 
     // Versi aplikasi, dipakai di footer semua layout.
     'version' => env('APP_VERSION', '1.0 (Final)'),

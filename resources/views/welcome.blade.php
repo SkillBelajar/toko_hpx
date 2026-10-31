@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'PawanDigita — Sistem Kasir & Kelola Stok Toko HP')
+@section('title', 'Toko HP — Sistem Kasir & Kelola Stok Toko HP')
 @section('description', 'SaaS POS untuk toko HP: scan IMEI pakai kamera HP, anti kecurangan kasir dengan shift, dan notifikasi stok mengendap.')
 
 @section('content')
@@ -41,6 +41,7 @@
             </div>
 
             <p class="mt-4 text-xs text-slate-500">Tanpa kartu kredit. Paket Free langsung aktif.</p>
+            <p class="mt-3 text-xs text-slate-500">WhatsApp Admin: <a href="https://wa.me/6289696380422" class="font-semibold text-emerald-600 hover:underline">0896 9638 0422</a></p>
         </div>
 
         <div class="relative mx-auto w-full max-w-sm">

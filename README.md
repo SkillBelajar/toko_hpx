@@ -1,4 +1,4 @@
-# PawanDigita — SaaS POS Toko HP
+# Toko HP — SaaS POS Toko HP
 
 SaaS Point of Sales multi-tenant untuk toko HP: kasir dengan scan IMEI via kamera,
 anti-kecurangan kasir (shift + modal laci), aging alert stok mengendap, dan pengingat upsell.

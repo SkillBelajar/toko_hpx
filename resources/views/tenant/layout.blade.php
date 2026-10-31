@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — {{ config('app.name', 'PawanDigita') }}</title>
+    <title>@yield('title', 'Dashboard') — {{ config('app.name', 'Toko HP') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-full bg-slate-100 font-sans text-slate-800 antialiased" x-data="{ sidebar: false }">
@@ -20,7 +20,7 @@
         <div class="flex h-16 items-center gap-2 border-b border-white/10 px-5">
             <span class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 font-bold text-white">TH</span>
             <div class="min-w-0 leading-tight">
-                <p class="truncate text-sm font-bold text-white">{{ auth()->user()->tenant?->nama_toko ?? 'PawanDigita' }}</p>
+                <p class="truncate text-sm font-bold text-white">{{ auth()->user()->tenant?->nama_toko ?? 'Toko HP' }}</p>
                 <p class="text-[11px] uppercase tracking-wider text-slate-400">Tenant</p>
             </div>
         </div>
@@ -105,7 +105,7 @@
 
         <footer class="border-t border-slate-200 bg-white px-4 py-4 text-xs text-slate-500 sm:px-6">
             <div class="flex items-center justify-between">
-                <span>&copy; {{ date('Y') }} {{ config('app.name', 'PawanDigita') }}</span>
+                <span>&copy; {{ date('Y') }} {{ config('app.name', 'Toko HP') }}</span> · <a href="https://wa.me/6289696380422" class="font-semibold text-emerald-600 hover:underline">WA: 0896 9638 0422</a>
                 <span class="font-bold text-slate-800">Versi {{ config('app.version', '1.0 (Final)') }}</span>
             </div>
         </footer>
