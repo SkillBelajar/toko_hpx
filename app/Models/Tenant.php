@@ -32,4 +32,32 @@ class Tenant extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    /** Batas total IMEI paket; null = unlimited. */
+    public function imeiLimit(): ?int
+    {
+        return $this->package?->total_imei_limit;
+    }
+
+    public function imeiUsed(): int
+    {
+        return $this->inventories()->count();
+    }
+
+    public function imeiLimitReached(): bool
+    {
+        $limit = $this->imeiLimit();
+
+        return $limit !== null && $this->imeiUsed() >= $limit;
+    }
 }

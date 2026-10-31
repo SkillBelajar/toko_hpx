@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\TenantController;
+use App\Http\Controllers\Tenant\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('welcome'))->name('home');
@@ -37,5 +38,12 @@ Route::middleware(['auth', 'role:tenant'])
     ->prefix('tenant')
     ->name('tenant.')
     ->group(function () {
-        Route::view('/dashboard', 'tenant.dashboard')->name('tenant.dashboard');
+        Route::view('/dashboard', 'tenant.dashboard')->name('dashboard');
+
+        Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+
+        Route::view('/cashier', 'tenant.placeholder')->name('cashier');
+        Route::view('/reports', 'tenant.placeholder')->name('reports');
+        Route::view('/settings', 'tenant.placeholder')->name('settings');
     });
