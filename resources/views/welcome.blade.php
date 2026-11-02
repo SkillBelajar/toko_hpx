@@ -16,6 +16,9 @@
                 <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
                 Multi-tenant SaaS untuk toko HP
             </span>
+            <span class="ml-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                &#10003; Kualitas diuji mengikuti standar ISO/IEC 25010
+            </span>
 
             <h1 class="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
                 Sistem Kasir &amp; Kelola Stok Toko HP<br>
@@ -117,6 +120,56 @@
                 langsung tersimpan rapi tanpa salah ketik 15 digit.
             </p>
         </div>
+    </div>
+</section>
+
+{{-- STANDAR KUALITAS (ISO/IEC 25010) --}}
+<section id="standar" class="border-y border-slate-200 bg-slate-50">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <div class="max-w-2xl">
+            <p class="text-sm font-bold uppercase tracking-wider text-indigo-600">Standar Kualitas</p>
+            <h2 class="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                9 janji kualitas yang kami pegang &mdash; diuji, bukan sekadar klaim
+            </h2>
+            <p class="mt-4 text-slate-600">
+                Aplikasi ini dinilai terhadap <strong class="text-slate-900">ISO/IEC 25010:2023</strong>,
+                standar internasional kualitas perangkat lunak. Tiap butir di bawah sudah diuji di sistem nyata.
+            </p>
+        </div>
+
+        <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @php
+                $standar = [
+                    ['Fungsi lengkap &amp; hasil benar', 'Kasir menghitung multi-item + diskon tanpa salah hitung. Setiap IMEI tersimpan persis seperti yang discan.', 'indigo'],
+                    ['Ringan &amp; cepat', 'Cari 1 IMEI di antara 5.000 stok: kurang dari sepersekian detik. Tetap lancar walau sinyal lemah.', 'sky'],
+                    ['Jalan di mana saja', 'HP Android murah RAM 2GB, laptop kasir, browser mana pun. Bisa dipasang sebagai aplikasi di layar HP.', 'emerald'],
+                    ['Mudah dipakai', 'Pegawai baru bisa jualan di hari pertama: panduan 3 langkah tampil langsung di layar kasir.', 'amber'],
+                    ['Tidak mati saat internet putus', 'Transaksi tetap tercatat offline, terkirim otomatis begitu sinyal kembali. Uang tidak hilang karena koneksinya.', 'rose'],
+                    ['Aman &amp; tahan kecurangan', 'Kata sandi tersimpan teracak, kasir tidak bisa melihat harga beli, dan setiap perubahan stok tercatat siapa pelakunya.', 'violet'],
+                    ['Terhubung dengan alat lain', 'Cetak struk ke printer Bluetooth, ekspor stok &amp; penjualan ke Excel/Google Sheets untuk pembukuan.', 'cyan'],
+                    ['Mudah dikembangkan', 'Fitur baru ditambah tanpa merusak modul lama &mdash; dijaga oleh rangkaian pengujian otomatis.', 'slate'],
+                    ['Salah klik tidak merusak data', 'Penghapusan penting butuh konfirmasi dua kali. Data pelanggan dilindungi sesuai UU 27/2022 PDP.', 'teal'],
+                ];
+                $bg = ['indigo'=>'bg-indigo-50 text-indigo-600','sky'=>'bg-sky-50 text-sky-600','emerald'=>'bg-emerald-50 text-emerald-600','amber'=>'bg-amber-50 text-amber-600','rose'=>'bg-rose-50 text-rose-600','violet'=>'bg-violet-50 text-violet-600','cyan'=>'bg-cyan-50 text-cyan-600','slate'=>'bg-slate-100 text-slate-600','teal'=>'bg-teal-50 text-teal-600'];
+            @endphp
+            @foreach ($standar as $i => $s)
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-bold {{ $bg[$s[2]] }}">{{ $i + 1 }}</span>
+                    <div>
+                        <h3 class="text-sm font-bold leading-snug text-slate-900">{!! $s[0] !!}</h3>
+                        <p class="mt-1.5 text-[13px] leading-relaxed text-slate-600">{!! $s[1] !!}</p>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <p class="mt-6 text-xs text-slate-400">
+            Rujukan standar: ISO/IEC 25010:2023 (SQuaRE &mdash; Product quality model) &middot;
+            kepatuhan data: UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi &middot;
+            <a href="{{ route('privacy') }}" class="font-semibold text-slate-500 hover:text-indigo-600 hover:underline">Kebijakan privasi</a>
+        </p>
     </div>
 </section>
 
