@@ -192,6 +192,15 @@ class InventoryController extends Controller
             return back()->withInput()->withErrors(['imei' => 'Nomor IMEI tidak valid.']);
         }
 
+        // Hasil scan barcode bisa membawa karakter non-digit; setelah dibersihkan
+        // panjang harus wajar — cegah IMEI terpotong diam-diam (mis. "CHK8841" -> "8841").
+        $tooShort = $imeis->first(fn ($v) => strlen($v) < 6 || strlen($v) > 17);
+        if ($tooShort) {
+            return back()->withInput()->withErrors([
+                'imei' => 'IMEI harus 6-17 digit angka. Nilai tidak valid: "'.$tooShort.'".',
+            ]);
+        }
+
         $limit = $tenant->imeiLimit();
         $used = $tenant->imeiUsed();
 
@@ -218,7 +227,7 @@ class InventoryController extends Controller
                     continue;
                 }
 
-                Inventory::create([
+                $item = Inventory::create([
                     'tenant_id'  => $tenant->id,
                     'product_id' => $product->id,
                     'imei'       => $imei,
@@ -226,7 +235,7 @@ class InventoryController extends Controller
                     'entry_date' => $data['entry_date'] ?? now()->toDateString(),
                 ]);
 
-                AuditLogger::log($tenant->id, 'create', Inventory::latest('id')->value('id'), [
+                AuditLogger::log($tenant->id, 'create', $item->id, [
                     'imei' => ['old' => null, 'new' => $imei],
                 ]);
 
