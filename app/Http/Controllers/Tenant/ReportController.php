@@ -30,34 +30,43 @@ class ReportController extends Controller
 
         $range = (clone $base())->latest('transactions.created_at')->get();
 
+        // Modal tiap baris transaksi: harga beli produk saat itu.
+        // Produk tanpa price_buy -> modal dihitung 0, ditandai lewat incompleteCost.
+        $cost = fn ($tx) => (int) ($tx->inventory?->product?->price_buy ?? 0);
+
+        $todayRows = (clone $base())
+            ->whereDate('transactions.created_at', today())
+            ->latest('transactions.created_at')
+            ->get();
+
+        $monthRows = (clone $base())
+            ->whereYear('transactions.created_at', now()->year)
+            ->whereMonth('transactions.created_at', now()->month)
+            ->latest('transactions.created_at')
+            ->get();
+
         return view('tenant.reports.sales', [
             'from' => $from,
             'to' => $to,
             'hasRange' => $hasRange,
             'rangeTransactions' => $range,
             'rangeTotal' => (int) $range->sum('final_price'),
+            'rangeCost' => (int) $range->sum($cost),
+            'rangeProfit' => (int) $range->sum(fn ($tx) => $tx->final_price - $cost($tx)),
             'rangeCount' => $range->count(),
+            'incompleteCost' => $range->filter(fn ($tx) => $tx->inventory?->product?->price_buy === null)->count(),
 
-            'todayTransactions' => (clone $base())
-                ->whereDate('transactions.created_at', today())
-                ->latest('transactions.created_at')
-                ->get(),
-            'todayTotal' => (int) Transaction::where('tenant_id', $tenantId)->whereDate('created_at', today())->sum('final_price'),
-            'todayCount' => Transaction::where('tenant_id', $tenantId)->whereDate('created_at', today())->count(),
+            'todayTransactions' => $todayRows,
+            'todayTotal' => (int) $todayRows->sum('final_price'),
+            'todayCost' => (int) $todayRows->sum($cost),
+            'todayProfit' => (int) $todayRows->sum(fn ($tx) => $tx->final_price - $cost($tx)),
+            'todayCount' => $todayRows->count(),
 
-            'monthTransactions' => (clone $base())
-                ->whereYear('transactions.created_at', now()->year)
-                ->whereMonth('transactions.created_at', now()->month)
-                ->latest('transactions.created_at')
-                ->get(),
-            'monthTotal' => (int) Transaction::where('tenant_id', $tenantId)
-                ->whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month)
-                ->sum('final_price'),
-            'monthCount' => Transaction::where('tenant_id', $tenantId)
-                ->whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month)
-                ->count(),
+            'monthTransactions' => $monthRows,
+            'monthTotal' => (int) $monthRows->sum('final_price'),
+            'monthCost' => (int) $monthRows->sum($cost),
+            'monthProfit' => (int) $monthRows->sum(fn ($tx) => $tx->final_price - $cost($tx)),
+            'monthCount' => $monthRows->count(),
         ]);
     }
 

@@ -95,6 +95,18 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
+                    <label for="price_buy" class="block text-sm font-medium text-slate-700">
+                        Harga Modal (HPP)
+                        <span class="font-normal text-slate-400">&mdash; buat hitung laba rugi, boleh dikosongkan</span>
+                    </label>
+                    <input id="price_buy" name="price_buy" type="number" inputmode="numeric" min="0" step="1000"
+                        value="{{ old('price_buy') }}"
+                        class="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                        placeholder="0">
+                    @error('price_buy') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
                     <label for="price_sell" class="block text-sm font-medium text-slate-700">Harga Jual (Rp)</label>
                     <input id="price_sell" name="price_sell" type="number" min="0" step="1000" required value="{{ old('price_sell') }}"
                         class="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"

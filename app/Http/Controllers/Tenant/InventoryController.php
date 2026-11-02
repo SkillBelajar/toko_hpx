@@ -175,11 +175,14 @@ class InventoryController extends Controller
         $data = $request->validate([
             'tipe_hp'    => ['required', 'string', 'max:120'],
             'brand'      => ['nullable', 'string', 'max:80'],
+            'price_buy'  => ['nullable', 'integer', 'min:0'],
             'price_sell' => ['required', 'integer', 'min:0'],
             'imei'       => ['required', 'string'],
             'entry_date' => ['nullable', 'date'],
         ], [
             'imei.required' => 'Minimal isi satu nomor IMEI.',
+            'price_sell.min' => 'Harga jual tidak boleh negatif.',
+            'price_buy.min' => 'Harga modal tidak boleh negatif.',
         ]);
 
         $imeis = collect(preg_split('/[\s,;]+/', $data['imei']))
@@ -214,8 +217,18 @@ class InventoryController extends Controller
         $created = DB::transaction(function () use ($tenant, $data, $imeis) {
             $product = Product::firstOrCreate(
                 ['tenant_id' => $tenant->id, 'tipe_hp' => $data['tipe_hp']],
-                ['brand' => $data['brand'] ?? null, 'price_sell' => $data['price_sell']],
+                [
+                    'brand'      => $data['brand'] ?? null,
+                    'price_buy'  => $data['price_buy'] ?? null,
+                    'price_sell' => $data['price_sell'],
+                ],
             );
+
+            // Produk sudah ada tapi harga modal baru diisi — ikutkan supaya
+            // laporan laba rugi punya dasar modal.
+            if (($data['price_buy'] ?? null) !== null && $product->price_buy === null) {
+                $product->update(['price_buy' => $data['price_buy']]);
+            }
 
             $skipped = 0;
             $added = 0;
