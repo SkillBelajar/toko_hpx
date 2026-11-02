@@ -68,24 +68,23 @@ function posScanner() {
             this.scanStatus = 'Meminta izin kamera...';
             await this.$nextTick();
             try {
-                this.scanner = new Html5Qrcode('scanner-region');
-                await this.scanner.start({ facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 260, height: 160 } },
-                    (decoded) => this.onDetected(decoded), () => {});
+                this.scanner = ImeiScanner.create('scanner-region', 'single',
+                    (raw) => this.onDetected(raw),
+                    (msg) => { this.scanStatus = msg; });
+                await this.scanner.start();
                 this.scanStatus = 'Kamera aktif — arahkan ke barcode IMEI.';
-            } catch (e) { this.scanning = false; this.error = 'Kamera tidak bisa dibuka: ' + (e?.message || e); }
+            } catch (e) { this.scanning = false; this.scanStatus = ''; this.error = 'Kamera tidak bisa dibuka: ' + (e?.message || e); }
         },
 
         async stopScan() {
             this.scanning = false;
-            if (this.scanner) { try { await this.scanner.stop(); await this.scanner.clear(); } catch (e) {} this.scanner = null; }
+            if (this.scanner) { await this.scanner.stop(); this.scanner = null; }
             this.scanStatus = '';
         },
 
         onDetected(text) {
             const imei = String(text).replace(/\D/g, '');
             if (!imei) return;
-            if (navigator.vibrate) navigator.vibrate(80);
             this.stopScan();
             this.lookup(imei);
         },

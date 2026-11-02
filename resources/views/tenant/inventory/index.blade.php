@@ -298,10 +298,10 @@ function imeiScanner() {
             this.status = 'Meminta izin kamera...';
             await this.$nextTick();
             try {
-                this.scanner = new Html5Qrcode('imei-scanner-region');
-                await this.scanner.start({ facingMode: 'environment' },
-                    { fps: 8, qrbox: { width: 280, height: 140 } },
-                    (t) => this.onDetected(t), () => {});
+                this.scanner = ImeiScanner.create('imei-scanner-region', 'multi',
+                    (t) => this.onDetected(t),
+                    (msg) => { this.status = msg; });
+                await this.scanner.start();
                 this.status = 'Arahkan kamera ke barcode IMEI — bisa berturut-turut.';
             } catch (e) {
                 this.active = false;
@@ -338,6 +338,9 @@ function imeiScanner() {
     };
 }
 </script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="/js/imei-scanner.js"></script>
+<style>
+  #scanner-region video, #imei-scanner-region video { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
 
 @endsection

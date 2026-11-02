@@ -189,7 +189,10 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  #scanner-region video, #imei-scanner-region video { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+<script src="/js/imei-scanner.js"></script>
 <script>
 @include('tenant.pos.pos_js')
 </script>
