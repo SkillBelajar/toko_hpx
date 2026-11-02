@@ -177,7 +177,8 @@
                     class="flex-1 rounded-xl border border-slate-300 px-4 py-3.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
                     Batal
                 </button>
-                <button type="button" @click="document.querySelector('#modal-add-stock form').requestSubmit()"
+                <button type="button"
+                    @click="window.dispatchEvent(new Event('inventory:stop-scan')); document.querySelector('#modal-add-stock form').requestSubmit()"
                     class="flex-[2] rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
                     Simpan Stok
                 </button>
@@ -299,6 +300,8 @@ function imeiScanner() {
         active: false, scanner: null, status: '', last: '', scanned: [],
         init() {
             window.addEventListener('beforeunload', () => { if (this.scanner) this.stop(); });
+            // Lepas kamera sebelum form disubmit — stream aktif bisa membatalkan submit.
+            window.addEventListener('inventory:stop-scan', () => { if (this.scanner) this.stop(); });
         },
         pushToBox(imei) {
             const box = this.$refs.imeiBox;
@@ -344,7 +347,8 @@ function imeiScanner() {
         async stop() {
             this.active = false;
             if (this.scanner) {
-                try { await this.scanner.stop(); await this.scanner.clear(); } catch (e) {}
+                // ImeiScanner hanya punya stop(); clear() adalah API html5-qrcode lama.
+                try { await this.scanner.stop(); } catch (e) {}
                 this.scanner = null;
             }
             this.status = '';
