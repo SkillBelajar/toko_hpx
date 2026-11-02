@@ -66,6 +66,10 @@
                     <strong class="text-slate-900">Rp {{ number_format($section['total'], 0, ',', '.') }}</strong>
                     &middot; {{ $section['count'] }} HP
                 </p>
+                <a href="{{ route('tenant.export.sales', request()->only('from', 'to')) }}"
+                    class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                    Export .xls
+                </a>
             </div>
 
             <div class="overflow-x-auto">
@@ -90,7 +94,7 @@
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-600">{{ $trx->inventory?->imei }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-900">
-                                    Rp {{ number_format((int) $trx->total_price, 0, ',', '.') }}
+                                    Rp {{ number_format((int) $trx->final_price, 0, ',', '.') }}
                                 </td>
                             </tr>
                         @empty

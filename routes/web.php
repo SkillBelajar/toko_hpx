@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Superadmin\PackageController;
 use App\Http\Controllers\Superadmin\TenantController;
 use App\Http\Controllers\Tenant\InventoryController;
+use App\Http\Controllers\Tenant\ExportController;
 use App\Http\Controllers\GuideController;
 use App\Http\Controllers\Tenant\PosController;
 use App\Http\Controllers\Tenant\ReportController;
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'role:tenant'])
 
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
         Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+        Route::get('/export/inventory', [ExportController::class, 'inventory'])->name('export.inventory');
+        Route::get('/export/sales', [ExportController::class, 'sales'])->name('export.sales');
         Route::get('/inventory/{inventory}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
         Route::put('/inventory/{inventory}', [InventoryController::class, 'update'])->name('inventory.update');
         Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventory.destroy');

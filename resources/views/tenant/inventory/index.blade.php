@@ -43,6 +43,7 @@
 </div>
 
 {{-- Form tambah stok --}}
+@php $errors = $errors ?? new Illuminate\Support\ViewErrorBag; @endphp
 <div class="mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm" x-data="{ open: {{ $errors->any() ? 'true' : 'false' }} }">
     <button type="button" @click="open = !open"
         class="flex w-full items-center justify-between gap-3 px-5 py-4 text-left">
@@ -122,6 +123,8 @@
     @if ($search !== '')
         <a href="{{ route('tenant.inventory.index') }}" class="shrink-0 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
     @endif
+    <a href="{{ route('tenant.export.inventory', request()->only('q')) }}"
+        class="shrink-0 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">Export .xls</a>
 </form>
 
 {{-- Tabel stok --}}
