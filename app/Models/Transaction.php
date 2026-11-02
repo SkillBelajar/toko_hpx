@@ -27,7 +27,6 @@ class Transaction extends Model
         return [
             'total_price' => 'integer',
             'discount_amount' => 'integer',
-            'final_price' => 'integer',
             'payment_cash' => 'integer',
             'payment_qris' => 'integer',
             'payment_transfer' => 'integer',

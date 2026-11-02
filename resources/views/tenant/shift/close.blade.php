@@ -48,7 +48,7 @@
             </div>
         </dl>
 
-        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4" x-data="{ closing: {{ (int) old('closing_amount', 0) }}, expected: {{ (int) $expectedAmount }}, cash: {{ $expectedCash ?? 0 }}, qris: {{ $expectedQris ?? 0 }}, transfer: {{ $expectedTransfer ?? 0 }}, closingCash: {{ (int) old('closing_cash', 0) }}, closingQris: {{ (int) old('closing_qris', 0) }}, closingTransfer: {{ (int) old('closing_transfer', 0) }, mode: 'total' }"
+        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4" x-data="{ closing: {{ (int) old('closing_amount', 0) }}, expected: {{ (int) $expectedAmount }}, cash: {{ (int) ($expectedCash ?? 0) }}, qris: {{ (int) ($expectedQris ?? 0) }}, transfer: {{ (int) ($expectedTransfer ?? 0) }}, closingCash: {{ (int) old('closing_cash', 0) }}, closingQris: {{ (int) old('closing_qris', 0) }}, closingTransfer: {{ (int) old('closing_transfer', 0) }}, mode: 'total' }"
             onsubmit="return confirm('Tutup shift sekarang? Shift yang sudah ditutup tidak bisa dibuka kembali.')">
             @csrf
             @method('PUT')
@@ -94,8 +94,6 @@
             </div>
 
             @error('closing_amount') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-
             {{-- Preview selisih langsung --}}
             <div class="rounded-xl border px-4 py-3 text-sm"
                 :class="(closing - expected) < 0 ? 'border-red-200 bg-red-50 text-red-700' : ((closing - expected) > 0 ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-emerald-200 bg-emerald-50 text-emerald-700')">

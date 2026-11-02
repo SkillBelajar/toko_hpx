@@ -145,12 +145,12 @@ class PosController extends Controller
                     array_map('intval', $data['payment'] ?? [])
                 );
                 if ($method === 'mixed') {
-                    if (($pay['cash'] + $pay['qris'] + $pay['transfer']) !== $finalTotal) {
+                    $totalInput = $pay['cash'] + $pay['qris'] + $pay['transfer'];
+                    if ($totalInput !== $finalTotal) {
                         throw new \RuntimeException('Jumlah breakdown pembayaran tidak sama dengan total nota (Rp '.$finalTotal.').');
                     }
                 } else {
-                    $pay[$method] = $finalTotal;
-                    $pay = array_fill_keys(['cash', 'qris', 'transfer'], 0) ;
+                    $pay = array_fill_keys(['cash', 'qris', 'transfer'], 0);
                     $pay[$method] = $finalTotal;
                 }
 
@@ -176,6 +176,7 @@ class PosController extends Controller
                     ];
                 }
 
+                // Simpan semua transaksi
                 foreach ($rows as $r) {
                     $item = $items[$r['id']];
                     $item->update(['status' => Inventory::STATUS_SOLD]);
@@ -195,7 +196,7 @@ class PosController extends Controller
                     ]);
                 }
 
-                // Rekonsiliasi laci dari seluruh transaksi shift (total + breakdown metode)
+                // Rekonsiliasi laci dari seluruh transaksi shift — cukup 1x setelah semua insert
                 $shift->recalculateExpected();
 
                 return [
