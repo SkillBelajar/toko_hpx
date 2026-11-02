@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
 use App\Models\Product;
+use App\Support\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,14 @@ class InventoryController extends Controller
         }
 
         DB::transaction(function () use ($inventory, $data, $imei) {
+            $before = [
+                'imei' => $inventory->imei,
+                'tipe_hp' => $inventory->product?->tipe_hp,
+                'brand' => $inventory->product?->brand,
+                'price_sell' => $inventory->product?->price_sell,
+                'entry_date' => optional($inventory->entry_date)->toDateString(),
+            ];
+
             if ($inventory->status === Inventory::STATUS_AVAILABLE) {
                 $inventory->update(['imei' => $imei]);
             }
@@ -104,6 +113,17 @@ class InventoryController extends Controller
                 'brand'      => $data['brand'] ?: null,
                 'price_sell' => $data['price_sell'],
             ]);
+
+            $after = [
+                'imei' => $inventory->imei,
+                'tipe_hp' => $data['tipe_hp'],
+                'brand' => $data['brand'] ?: null,
+                'price_sell' => $data['price_sell'],
+                'entry_date' => $data['entry_date'],
+            ];
+            $diff = collect($after)->filter(fn ($v, $k) => ($before[$k] ?? null) != $v)
+                ->map(fn ($v, $k) => ['old' => $before[$k] ?? null, 'new' => $v])->all();
+            AuditLogger::log($tenant->id, 'update', $inventory->id, $diff);
         });
 
         return redirect()
@@ -129,7 +149,10 @@ class InventoryController extends Controller
             );
         }
 
-        DB::transaction(function () use ($inventory, $productId) {
+        DB::transaction(function () use ($inventory, $productId, $tenant) {
+            AuditLogger::log($tenant->id, 'delete', $inventory->id, [
+                'imei' => ['old' => $inventory->imei, 'new' => null],
+            ]);
             $inventory->delete();
 
             // Hapus product jika tidak punya inventory lagi.
@@ -201,6 +224,10 @@ class InventoryController extends Controller
                     'imei'       => $imei,
                     'status'     => Inventory::STATUS_AVAILABLE,
                     'entry_date' => $data['entry_date'] ?? now()->toDateString(),
+                ]);
+
+                AuditLogger::log($tenant->id, 'create', Inventory::latest('id')->value('id'), [
+                    'imei' => ['old' => null, 'new' => $imei],
                 ]);
 
                 $added++;

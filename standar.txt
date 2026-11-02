@@ -4,11 +4,10 @@ Nasional: belum ada SNI padanan langsung → pakai internasional ini. Regulasi R
 1. **Sesuai kebutuhan (Functional Suitability)** — Aplikasi punya semua fungsi yang toko butuh, dan hasilnya benar.
    Contoh: kasir bisa hitung total 3 barang diskon 10% + IMEI tersimpan, tanpa salah hitung.
    
-   
-   
-   
 2. **Ringan & cepat (Performance Efficiency)** — Tetap enak dipakai walau stok ribuan dan sinyal lemah.
    Contoh: cari IMEI di 5.000 data selesai < 2 detik; halaman buka < 3 detik di 3G.
+   
+   
 3. **Bisa dipasang di mana-mana (Flexibility)** — Jalan di HP Android murah, laptop kasir, dan browser.
    Contoh: kasir pakai HP RAM 2GB, pemilik cek laporan dari laptop.
 4. **Mudah dipakai (Interaction Capability)** — Pegawai baru bisa jualan di hari pertama tanpa training panjang.

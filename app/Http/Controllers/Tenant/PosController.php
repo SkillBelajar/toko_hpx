@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CashShift;
 use App\Models\Inventory;
 use App\Models\Transaction;
+use App\Support\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -180,6 +181,10 @@ class PosController extends Controller
                 foreach ($rows as $r) {
                     $item = $items[$r['id']];
                     $item->update(['status' => Inventory::STATUS_SOLD]);
+                    AuditLogger::log($tenant->id, 'checkout', $item->id, [
+                        'status' => ['old' => Inventory::STATUS_AVAILABLE, 'new' => Inventory::STATUS_SOLD],
+                        'nota_id' => ['old' => null, 'new' => $notaId],
+                    ]);
                     Transaction::create([
                         'tenant_id' => $tenant->id,
                         'shift_id' => $shift->id,
