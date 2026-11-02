@@ -46,7 +46,7 @@
                             <span class="font-normal text-slate-400">&mdash; boleh dikosongkan</span>
                         </label>
                         <input id="price_buy" name="price_buy" type="text" inputmode="numeric"
-                            x-data="money({{ (int) old('price_buy', $inventory->product?->price_buy ?? 0) }})"
+                            x-data="money({{ (int) preg_replace('/\D/', '', (string) old('price_buy', $inventory->product?->price_buy ?? 0)) }})"
                             x-model="display" @input="display = fmt(display)"
                             class="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                             placeholder="0">
@@ -56,7 +56,7 @@
                     <div>
                         <label for="price_sell" class="block text-sm font-medium text-slate-700">Harga Jual (Rp)</label>
                         <input id="price_sell" name="price_sell" type="text" inputmode="numeric" required
-                            x-data="money({{ (int) old('price_sell', $inventory->product?->price_sell ?? 0) }})"
+                            x-data="money({{ (int) preg_replace('/\D/', '', (string) old('price_sell', $inventory->product?->price_sell ?? 0)) }})"
                             x-model="display" @input="display = fmt(display)"
                             class="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                             placeholder="2.500.000">

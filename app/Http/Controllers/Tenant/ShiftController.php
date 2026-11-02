@@ -23,6 +23,11 @@ class ShiftController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Input uang tampil bertitik ("1.000.000"); ubah ke angka bersih dulu.
+        $request->merge([
+            'opening_amount' => (int) preg_replace('/\D/', '', (string) $request->input('opening_amount', '')),
+        ]);
+
         $data = $request->validate([
             'opening_amount' => ['required', 'integer', 'min:0'],
         ], [
@@ -75,6 +80,13 @@ class ShiftController extends Controller
         if (! $shift) {
             return redirect()->route('tenant.shift.open');
         }
+
+        // Input uang tampil bertitik; ubah ke angka bersih sebelum validasi.
+        $money = [];
+        foreach (['closing_amount', 'closing_cash', 'closing_qris', 'closing_transfer'] as $k) {
+            $money[$k] = (int) preg_replace('/\D/', '', (string) $request->input($k, ''));
+        }
+        $request->merge($money);
 
         $data = $request->validate([
             'closing_amount' => ['required', 'integer', 'min:0'],

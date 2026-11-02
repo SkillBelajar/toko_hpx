@@ -65,6 +65,8 @@ class InventoryController extends Controller
 
         abort_unless($inventory->tenant_id === $tenant?->id, 403);
 
+        $this->normalizeMoney($request, ['price_buy', 'price_sell']);
+
         $data = $request->validate([
             'imei'        => ['required', 'string'],
             'tipe_hp'     => ['required', 'string', 'max:120'],
@@ -172,11 +174,37 @@ class InventoryController extends Controller
             ->with('status', 'Stok berhasil dihapus.');
     }
 
+    /**
+     * Input uang tampil bertitik ("1.000.000") supaya tidak salah baca,
+     * tapi validasi butuh integer. Ubah ke angka bersih sebelum validate().
+     */
+    private function normalizeMoney(Request $request, array $keys): void
+    {
+        $merge = [];
+        foreach ($keys as $key) {
+            if (! $request->has($key)) {
+                continue;
+            }
+            $raw = $request->input($key);
+            if ($raw === null || $raw === '') {
+                $merge[$key] = null;
+
+                continue;
+            }
+            $merge[$key] = (int) preg_replace('/\D/', '', (string) $raw);
+        }
+        if ($merge) {
+            $request->merge($merge);
+        }
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $tenant = $request->user()->tenant;
 
         abort_unless($tenant, 403, 'Akun Anda belum terhubung ke toko.');
+
+        $this->normalizeMoney($request, ['price_buy', 'price_sell']);
 
         $data = $request->validate([
             'tipe_hp'    => ['required', 'string', 'max:120'],
@@ -190,7 +218,6 @@ class InventoryController extends Controller
             'price_sell.min' => 'Harga jual tidak boleh negatif.',
             'price_buy.min' => 'Harga modal tidak boleh negatif.',
         ]);
-
         $imeis = collect(preg_split('/[\s,;]+/', $data['imei']))
             ->map(fn ($v) => preg_replace('/\D/', '', $v))
             ->filter(fn ($v) => $v !== '')

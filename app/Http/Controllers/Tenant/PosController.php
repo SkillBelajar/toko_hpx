@@ -106,6 +106,19 @@ class PosController extends Controller
             );
         }
 
+        // Diskon nominal & pembayaran campuran dikirim bertitik ("1.500.000")
+        // dari input format rupiah; ubah ke angka bersih sebelum validasi.
+        $money = [];
+        foreach (['discount_value', 'payment.cash', 'payment.qris', 'payment.transfer'] as $k) {
+            $raw = $request->input($k);
+            if ($raw !== null && $raw !== '') {
+                $money[$k] = (int) preg_replace('/\D/', '', (string) $raw);
+            }
+        }
+        if ($money) {
+            $request->merge($money);
+        }
+
         $data = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*' => ['required', 'integer', 'distinct'],

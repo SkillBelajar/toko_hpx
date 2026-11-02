@@ -26,7 +26,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('tenant.shift.store') }}" class="mt-5 space-y-4" x-data="money({{ (int) old('opening_amount', 0) }})">
+        <form method="POST" action="{{ route('tenant.shift.store') }}" class="mt-5 space-y-4" x-data="money({{ moneyInt(old('opening_amount', 0)) }})">
             @csrf
 
             <div>

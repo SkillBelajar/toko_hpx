@@ -127,6 +127,16 @@
         <input x-model="display" @input="display = fmt(display)" ...>
     Nilai yang dikirim ke server adalah angka bersih (tanpa titik).
 --}}
+{{-- Nomor bersih dari input uang bertitik. Blade: (int) "1.000.000" = 1 (PHP
+     berhenti di titik), jadi harus dibersihkan dulu sebelum diformat ulang. --}}
+@php
+    if (! function_exists('moneyInt')) {
+        function moneyInt($v): int {
+            return (int) preg_replace('/\D/', '', (string) ($v ?? 0));
+        }
+    }
+@endphp
+
 <script>
     window.moneyFmt = function (n) {
         return Number(String(n).replace(/\D/g, '') || 0).toLocaleString('id-ID');
