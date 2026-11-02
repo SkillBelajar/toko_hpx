@@ -12,6 +12,7 @@ services:
     volumes:
       - .:/var/www/html:cached
       - ./.env:/var/www/html/.env:ro
+      - tohx_vendor:/var/www/html/vendor
     depends_on:
       db:
         condition: service_healthy
@@ -72,3 +73,4 @@ networks:
 volumes:
   mysql_data:
   redis_data:
+  tohx_vendor:

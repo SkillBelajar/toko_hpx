@@ -55,11 +55,16 @@ class ShiftController extends Controller
             return redirect()->route('tenant.shift.open');
         }
 
+        $shift->recalculateExpected();
+
         return view('tenant.shift.close', [
             'shift' => $shift,
             'expectedAmount' => $this->expectedAmount($shift),
-            'totalSales' => (int) $shift->transactions()->sum('total_price'),
+            'totalSales' => (int) $shift->transactions()->sum('final_price'),
             'trxCount' => $shift->transactions()->count(),
+            'expectedCash' => (int) $shift->expected_cash,
+            'expectedQris' => (int) $shift->expected_qris,
+            'expectedTransfer' => (int) $shift->expected_transfer,
         ]);
     }
 
@@ -73,17 +78,31 @@ class ShiftController extends Controller
 
         $data = $request->validate([
             'closing_amount' => ['required', 'integer', 'min:0'],
+            'closing_cash' => ['nullable', 'integer', 'min:0'],
+            'closing_qris' => ['nullable', 'integer', 'min:0'],
+            'closing_transfer' => ['nullable', 'integer', 'min:0'],
         ], [
             'closing_amount.required' => 'Uang fisik laci akhir wajib diisi.',
         ]);
 
         // expected = modal awal + semua transaksi selama shift; variance = fisik - expected.
+        $shift->recalculateExpected();
         $expected = $this->expectedAmount($shift);
+
+        $closeCash = (int) ($data['closing_cash'] ?? $data['closing_amount']);
+        $closeQris = (int) ($data['closing_qris'] ?? 0);
+        $closeTransfer = (int) ($data['closing_transfer'] ?? 0);
 
         $shift->update([
             'closing_amount' => $data['closing_amount'],
             'expected_amount' => $expected,
             'variance' => (float) $data['closing_amount'] - (float) $expected,
+            'expected_cash' => (int) $shift->expected_cash,
+            'expected_qris' => (int) $shift->expected_qris,
+            'expected_transfer' => (int) $shift->expected_transfer,
+            'closing_cash' => $closeCash,
+            'closing_qris' => $closeQris,
+            'closing_transfer' => $closeTransfer,
             'closed_at' => now(),
         ]);
 
@@ -93,9 +112,9 @@ class ShiftController extends Controller
                 .' · selisih Rp '.number_format((float) $data['closing_amount'] - (float) $expected, 0, ',', '.').'.');
     }
 
-    /** expected_amount = opening_amount + total transaksi shift ini. */
+    /** expected_amount = opening_amount + total transaksi (final setelah diskon) shift ini. */
     private function expectedAmount(CashShift $shift): float
     {
-        return (float) $shift->opening_amount + (float) $shift->transactions()->sum('total_price');
+        return (float) $shift->opening_amount + (float) $shift->transactions()->sum('final_price');
     }
 }

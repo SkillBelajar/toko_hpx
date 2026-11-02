@@ -1,0 +1,28 @@
+**ISO/IEC 25010:2023** (SQuaRE — Product quality model), Ed.2, 22 hal.
+Nasional: belum ada SNI padanan langsung → pakai internasional ini. Regulasi RI pelengkap: UU 27/2022 PDP + Permenkop UKM (POS).
+
+1. **Sesuai kebutuhan (Functional Suitability)** — Aplikasi punya semua fungsi yang toko butuh, dan hasilnya benar.
+   Contoh: kasir bisa hitung total 3 barang diskon 10% + IMEI tersimpan, tanpa salah hitung.
+   
+   
+   
+   
+2. **Ringan & cepat (Performance Efficiency)** — Tetap enak dipakai walau stok ribuan dan sinyal lemah.
+   Contoh: cari IMEI di 5.000 data selesai < 2 detik; halaman buka < 3 detik di 3G.
+3. **Bisa dipasang di mana-mana (Flexibility)** — Jalan di HP Android murah, laptop kasir, dan browser.
+   Contoh: kasir pakai HP RAM 2GB, pemilik cek laporan dari laptop.
+4. **Mudah dipakai (Interaction Capability)** — Pegawai baru bisa jualan di hari pertama tanpa training panjang.
+   Contoh: tombol "Jual" besar, alur 3 langkah, ada panduan singkat di layar.
+5. **Tidak mudah rusak (Reliability)** — Tetap jalan saat internet putus atau listrik mati.
+   Contoh: transaksi tetap tercatat offline, tersinkron begitu online.
+6. **Aman (Security)** — Data pelanggan & harga modal tidak bocor, password tidak bisa ditebak.
+   Contoh: kasir tidak bisa lihat harga beli; login wajib password + log siapa ubah stok.
+7. **Bisa dicek benar-salah (Compatibility)** — Bisa tukar data dengan alat lain: printer struk, scanner barcode, Excel.
+   Contoh: cetak struk ke printer Bluetooth, ekspor daftar stok ke .xlsx.
+8. **Mudah dirawat (Maintainability)** — Update fitur tanpa bongkar ulang seluruh aplikasi.
+   Contoh: tambah fitur "cicilan" tanpa mengubah modul stok dan kasir.
+9. **Tidak membahayakan (Safety + kepatuhan data)** — Salah klik tidak merusak data; data pelanggan dilindungi hukum.
+   Contoh: hapus transaksi minta konfirmasi 2x; nomor HP pelanggan disimpan sesuai UU 27/2022 PDP.
+
+Referensi:
+- ISO/IEC 25010:2023 — https://www.iso.org/standard/78176.html (1/2)
