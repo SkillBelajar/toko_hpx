@@ -99,11 +99,43 @@
                     Nomor IMEI
                     <span class="font-normal text-slate-400">&mdash; satu per baris, atau pisahkan dengan koma/spasi</span>
                 </label>
-                <textarea id="imei" name="imei" rows="4" required
+                <textarea id="imei" name="imei" rows="4" required x-ref="imeiBox"
                     class="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 font-mono text-sm tracking-wide focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                     placeholder="356789012345671&#10;356789012345672">{{ old('imei') }}</textarea>
                 <p class="mt-1 text-xs text-slate-500">Mendukung scan barcode: hasil scan langsung terisi seperti diketik.</p>
                 @error('imei') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- SCAN CEPAT: kamera HP, banyak IMEI berturut-turut tanpa restart kamera --}}
+            <div x-data="imeiScanner()" x-init="init()" class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <button type="button" @click="start()" x-show="!active"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white transition active:scale-[0.99] hover:bg-slate-800">
+                    <span class="text-lg">&#128247;</span> Scan IMEI pakai kamera HP
+                </button>
+
+                <div x-cloak x-show="active" class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Kamera aktif &middot; <span x-text="scanned.length"></span> IMEI masuk
+                        </p>
+                        <button type="button" @click="stop()" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">Tutup</button>
+                    </div>
+                    <div id="imei-scanner-region" class="overflow-hidden rounded-lg bg-black" style="min-height:180px;max-height:45vh"></div>
+                    <p class="text-center text-[11px] text-slate-500" x-text="status"></p>
+                    <div class="flex flex-wrap gap-1.5" x-show="scanned.length">
+                        <template x-for="(s, i) in scanned" :key="i">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-emerald-800">
+                                <span x-text="s"></span>
+                                <button type="button" @click="remove(i)" class="text-emerald-600 hover:text-emerald-900">&times;</button>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                <p class="mt-2 text-[11px] text-slate-400">
+                    Butuh kamera belakang HP. Buka lewat <strong>https://</strong> atau localhost.
+                    Hasil scan masuk ke kotak IMEI di atas &mdash; tekan "Simpan Stok" sekali di akhir.
+                </p>
             </div>
 
             <button type="submit"
@@ -220,6 +252,67 @@ document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
         form.submit();
     });
 });
+
+// Scan cepat IMEI: kamera tetap menyala, tiap hasil scan ditambahkan ke kotak IMEI.
+function imeiScanner() {
+    return {
+        active: false, scanner: null, status: '', last: '', scanned: [],
+        init() {
+            window.addEventListener('beforeunload', () => { if (this.scanner) this.stop(); });
+        },
+        pushToBox(imei) {
+            const box = this.$refs.imeiBox;
+            if (!box) return;
+            const existing = box.value.split(/[\s,;]+/).filter(Boolean);
+            if (existing.includes(imei)) return;
+            existing.push(imei);
+            box.value = existing.join('\n');
+        },
+        async start() {
+            this.active = true;
+            this.status = 'Meminta izin kamera...';
+            await this.$nextTick();
+            try {
+                this.scanner = new Html5Qrcode('imei-scanner-region');
+                await this.scanner.start({ facingMode: 'environment' },
+                    { fps: 8, qrbox: { width: 280, height: 140 } },
+                    (t) => this.onDetected(t), () => {});
+                this.status = 'Arahkan kamera ke barcode IMEI — bisa berturut-turut.';
+            } catch (e) {
+                this.active = false;
+                this.status = '';
+                alert('Kamera tidak bisa dibuka: ' + (e?.message || e));
+            }
+        },
+        onDetected(text) {
+            const imei = String(text).replace(/\D/g, '');
+            if (!imei || imei === this.last) return;
+            this.last = imei;
+            if (navigator.vibrate) navigator.vibrate(60);
+            this.scanned.push(imei);
+            this.pushToBox(imei);
+            this.status = this.scanned.length + ' IMEI masuk. Lanjut scan unit berikutnya.';
+        },
+        remove(i) {
+            const imei = this.scanned.splice(i, 1)[0];
+            const box = this.$refs.imeiBox;
+            if (box) {
+                box.value = box.value.split(/[\s,;]+/).filter(v => v && v !== imei).join('\n');
+            }
+            this.last = '';
+        },
+        async stop() {
+            this.active = false;
+            if (this.scanner) {
+                try { await this.scanner.stop(); await this.scanner.clear(); } catch (e) {}
+                this.scanner = null;
+            }
+            this.status = '';
+            this.last = '';
+        },
+    };
+}
 </script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 @endsection
