@@ -9,9 +9,41 @@ function posScanner() {
 
         init() {
             this.$watch('scanning', (v) => { if (!v) this.stopScan(); });
+            // sinkron ulang saat online kembali / halaman dibuka
+            window.addEventListener('online', () => this.flushQueue());
+            if (navigator.onLine) this.flushQueue();
         },
 
         rupiah(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); },
+
+        // --- antrian offline: transaksi gagal kirim (internet putus) disimpan di
+        // localStorage, dikirim ulang otomatis saat koneksi kembali.
+        queueKey() { return 'pos_offline_queue_' + {{ $shift?->id ?? 0 }}; },
+        loadQueue() { try { return JSON.parse(localStorage.getItem(this.queueKey()) || '[]'); } catch (e) { return []; } },
+        saveQueue(q) { try { localStorage.setItem(this.queueKey(), JSON.stringify(q)); } catch (e) {} },
+        enqueue(payload) { const q = this.loadQueue(); q.push(payload); this.saveQueue(q); return q.length; },
+        async flushQueue() {
+            const q = this.loadQueue();
+            if (!q.length || !navigator.onLine) return;
+            const left = [];
+            for (const payload of q) {
+                try {
+                    const res = await fetch('{{ route('tenant.pos.checkout') }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+                        body: JSON.stringify(payload),
+                    });
+                    const body = await res.json().catch(() => ({}));
+                    if (res.ok && body.ok) { this.trxUsed = body.transaction_used ?? this.trxUsed; }
+                    else { left.push(payload); }
+                } catch (e) { left.push(payload); }
+            }
+            this.saveQueue(left);
+            if (q.length && !left.length) { this.success = 'Sinkron: ' + q.length + ' transaksi offline terkirim.'; }
+            else if (left.length) { this.error = left.length + ' transaksi masih menunggu koneksi.'; }
+        },
 
         gross() { return this.cart.reduce((s, c) => s + (Number(c.price_sell) || 0), 0); },
         discountAmount() {
@@ -126,7 +158,19 @@ function posScanner() {
                     + (body.transaction_limit ? ' · transaksi ' + body.transaction_used + '/' + body.transaction_limit : '');
                 if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
             } catch (e) {
-                this.checkoutError = 'Checkout gagal: ' + (e?.message || e);
+                // internet putus / server tak terjangkau: simpan ke antrian offline
+                this.enqueue({
+                    items: this.cart.map(c => c.inventory_id),
+                    discount_type: this.discountType,
+                    discount_value: this.discountValue,
+                    payment_method: this.method,
+                    payment: this.pay,
+                    queued_at: new Date().toISOString(),
+                });
+                this.upsell = false;
+                this.cart = []; this.discountValue = 0; this.pay = { cash: 0, qris: 0, transfer: 0 };
+                this.success = 'Tersimpan di antrian offline. Akan dikirim otomatis saat internet kembali.';
+                if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
             } finally { this.processing = false; }
         },
     };
