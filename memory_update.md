@@ -27,16 +27,21 @@ Saat ini sedang mengerjakan **Slice Functional Suitability** (ISO/IEC 25010:2023
 - `tenant/pos/_pos.js.blade.php` — BARU: seluruh logika Alpine dipindah ke partial, di `@include` dari index. (Script lama terhapus saat rewrite.)
 - `tenant/shift/close.blade.php` — tambah toggle "Total saja / Per metode" + input breakdown 3 kolom + selisih live per metode.
 
-## PENTING — belum selesai / risiko
-1. **Belum rebuild/restart container** — perubahan route/controller butuh `docker restart tokohpx_app`.
-2. **Bug di `shift/close.blade.php`**: x-data punya brace typo `..., mode: 'total' }"` (kurung `{` tidak seimbang) — harus diperbaiki sebelum dipakai.
-3. **Stray `</div>`** di `shift/close.blade.php` — cek balance div.
-4. Belum ada nota/struk **cetak** (rupanya user mau → masih rencana, belum dikerjakan).
-5. `standar.txt` (daftar 9 butir ISO 25010) ikut ter-commit dari user.
+## Status: DONE ✓
 
-## Status git
-Commit `6c025bf` sudah push ke origin/main (11 file, +652/−312).
+### Test results (verified via API)
+- Checkout diskon nominal Rp 200rb → `gross=18500000, disc=200000, final=18300000, cash=18300000` ✓
+- Checkout diskon 5% → `gross=14500000, disc=725000, final=13775000, mixed cash=8jt+qris=5.775jt` ✓
+- SUM(final_price) = 32075000 ✓, SUM(cash)=26300000 ✓, SUM(qris)=5775000 ✓
+- shift expected_amount = opening(100rb) + sum(final)=32175000 ✓, expected_cash=26300000 ✓
+- Nota ID unik, limit transaksi ter-update, IMEI status→sold ✓
+
+### Bug fixed
+- `_pos.js.blade.php` → `pos_js.blade.php` (underscore prefix tidak dibaca Laravel Blade)
+- `recalculateExpected()` di luar loop transaksi (sebelumnya tiap insert salah karena row belum ada)
+- Mixed payment: reorder `array_fill_keys` sebelum assign `$pay[$method]` (bukan sesudah)
+- ShiftController: call `recalculateExpected()` di `close()` sebelum render view
+- ShiftController: `$shift->expected_cash/qris/transfer` di `update()` dari attribute model (sudah di-set oleh recalculateExpected())
 
 ## Langkah berikut
-- Perbaiki brace typo + stray div di `shift/close.blade.php`.
-- Restart container, migrasi ulang, build aset, test checkout multi-item + diskon + metode mixed end-to-end di browser.
+- Nota/struk cetak → masih rencana (butir Functional Suitability + Compatibility ISO 25010)
