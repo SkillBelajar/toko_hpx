@@ -42,24 +42,39 @@
     </div>
 </div>
 
-{{-- Form tambah stok --}}
+{{-- Tombol buka modal tambah stok --}}
 @php $errors = $errors ?? new Illuminate\Support\ViewErrorBag; @endphp
-<div class="mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm" x-data="{ open: {{ $errors->any() ? 'true' : 'false' }} }">
-    <button type="button" @click="open = !open"
-        class="flex w-full items-center justify-between gap-3 px-5 py-4 text-left">
-        <span class="text-sm font-bold text-slate-900">+ Tambah Stok / IMEI</span>
-        <span class="text-xs font-semibold text-indigo-600" x-text="open ? 'Tutup' : 'Buka'">Buka</span>
+<div class="mb-4" x-data="{ open: {{ $errors->any() ? 'true' : 'false' }} }">
+    <button type="button" @click="open = true"
+        class="flex w-full items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 text-left shadow-sm transition hover:bg-indigo-100 active:scale-[0.99]">
+        <span class="text-sm font-bold text-indigo-900">+ Tambah Stok / IMEI</span>
+        <span class="text-xs font-semibold text-indigo-600">Scan pakai kamera HP &rarr;</span>
     </button>
 
-    <div x-cloak x-show="open" class="border-t border-slate-100 p-5">
-        @if ($imeiLimitReached ?? false)
-            <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                Limit Total Input IMEI Anda sudah habis. Silakan Upgrade Paket.
-            </div>
-        @endif
+    {{-- MODAL TAMBAH STOK --}}
+    <div id="modal-add-stock" x-cloak x-show="open" x-effect="document.body.style.overflow = open ? 'hidden' : ''"
+        class="fixed inset-0 z-50 flex flex-col bg-white">
 
-        <form method="POST" action="{{ route('tenant.inventory.store') }}" class="space-y-4">
-            @csrf
+        {{-- Header modal --}}
+        <div class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+            <div class="min-w-0">
+                <h2 class="text-sm font-bold text-slate-900">Tambah Stok / IMEI</h2>
+                <p class="truncate text-[11px] text-slate-500">Scan barcode atau ketik manual</p>
+            </div>
+            <button type="button" @click="open = false" aria-label="Tutup"
+                class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-300 text-lg font-bold text-slate-600 hover:bg-slate-100">&times;</button>
+        </div>
+
+        {{-- Body modal (scrollable) --}}
+        <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:mx-auto sm:w-full sm:max-w-2xl">
+            @if ($imeiLimitReached ?? false)
+                <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                    Limit Total Input IMEI Anda sudah habis. Silakan Upgrade Paket.
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('tenant.inventory.store') }}" class="space-y-4">
+                @csrf
 
             <div class="grid gap-4 sm:grid-cols-3">
                 <div class="sm:col-span-2">
@@ -137,12 +152,22 @@
                     Hasil scan masuk ke kotak IMEI di atas &mdash; tekan "Simpan Stok" sekali di akhir.
                 </p>
             </div>
-
-            <button type="submit"
-                class="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 sm:w-auto">
-                Simpan Stok
-            </button>
         </form>
+        </div>
+
+        {{-- Footer aksi sticky --}}
+        <div class="shrink-0 border-t border-slate-200 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:mx-auto sm:w-full sm:max-w-2xl">
+            <div class="flex gap-2">
+                <button type="button" @click="open = false"
+                    class="flex-1 rounded-xl border border-slate-300 px-4 py-3.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                    Batal
+                </button>
+                <button type="button" @click="document.querySelector('#modal-add-stock form').requestSubmit()"
+                    class="flex-[2] rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700">
+                    Simpan Stok
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
