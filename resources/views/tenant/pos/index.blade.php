@@ -58,6 +58,17 @@
   <div x-cloak x-show="error" class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" x-text="error"></div>
   <div x-cloak x-show="success" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" x-text="success"></div>
 
+  {{-- Panduan singkat 3 langkah: tampil selama keranjang masih kosong --}}
+  <div x-cloak x-show="!cart.length" class="mb-4 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3">
+    <p class="text-xs font-bold uppercase tracking-wider text-indigo-700">Cara jualan — 3 langkah</p>
+    <ol class="mt-1.5 space-y-1 text-sm text-indigo-900">
+      <li><strong>1.</strong> Scan barcode atau ketik IMEI HP.</li>
+      <li><strong>2.</strong> Set diskon &amp; metode bayar (Cash/QRIS/Transfer/Campur).</li>
+      <li><strong>3.</strong> Tekan tombol hijau "Bayar". Struk tersimpan otomatis.</li>
+    </ol>
+    <a href="{{ route('tenant.guide') }}" class="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline">Panduan lengkap &rarr;</a>
+  </div>
+
   {{-- KERANJANG NOTA --}}
   <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
