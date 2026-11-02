@@ -54,7 +54,9 @@
 
     <footer class="border-t border-slate-200 bg-slate-50">
         <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Toko HP') }}. Semua hak dilindungi.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Toko HP') }}. Semua hak dilindungi.
+                <a href="{{ route('privacy') }}" class="font-semibold text-indigo-600 hover:underline">Kebijakan Privasi (UU 27/2022 PDP)</a>
+            </p>
             <p class="font-bold text-slate-800">Versi {{ config('app.version', '1.0 (Final)') }}</p>
         </div>
     </footer>

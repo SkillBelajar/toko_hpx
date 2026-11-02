@@ -178,8 +178,9 @@
                                 Edit
                             </a>
                             @if ($item->status === 'available')
-                            <form method="POST" action="{{ route('tenant.inventory.destroy', $item) }}" class="inline"
-                                onsubmit="return confirm('Hapus IMEI {{ $item->imei }}?');">
+                            {{-- Konfirmasi 2 tahap: cegah salah klik (standar #9 Safety) --}}
+                            <form method="POST" action="{{ route('tenant.inventory.destroy', $item) }}" class="inline js-confirm-delete"
+                                data-imei="{{ $item->imei }}" data-tipe="{{ $item->product?->tipe_hp }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
@@ -205,5 +206,20 @@
 </div>
 
 <div class="mt-4">{{ $inventories->links() }}</div>
+
+{{-- Konfirmasi 2 tahap untuk hapus stok (standar #9: salah klik tidak merusak data) --}}
+<script>
+document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        if (form.dataset.confirmed === '1') return;
+        e.preventDefault();
+        var imei = form.dataset.imei, tipe = form.dataset.tipe || '';
+        if (!confirm('Hapus ' + tipe + ' (IMEI ' + imei + ') dari stok?')) return;
+        if (!confirm('Konfirmasi kedua: tindakan ini tidak bisa dibatalkan. Tetap hapus?')) return;
+        form.dataset.confirmed = '1';
+        form.submit();
+    });
+});
+</script>
 
 @endsection
