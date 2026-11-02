@@ -1,0 +1,19 @@
+{
+    "name": "Toko HP - Kasir & Stok",
+    "short_name": "Toko HP",
+    "description": "Kasir cepat, kelola stok IMEI, laporan harian untuk toko HP.",
+    "start_url": "/tenant/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#ffffff",
+    "theme_color": "#4f46e5",
+    "icons": [
+        {
+            "src": "/icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
