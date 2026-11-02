@@ -116,5 +116,41 @@
     </div>
 </div>
 
+{{--
+    Helper format rupiah untuk input uang.
+
+    Kenapa: input type="number" tidak bisa menampilkan titik pemisah ribuan,
+    sehingga 1000000 terbaca "1000000" dan mudah salah baca jadi 100.000.
+
+    Cara pakai:
+        x-data="money(1500000)"           -> state 'display' bertitik
+        <input x-model="display" @input="display = fmt(display)" ...>
+    Nilai yang dikirim ke server adalah angka bersih (tanpa titik).
+--}}
+<script>
+    window.moneyFmt = function (n) {
+        return Number(String(n).replace(/\D/g, '') || 0).toLocaleString('id-ID');
+    };
+    window.money = function (initial = 0) {
+        return {
+            display: window.moneyFmt(initial),
+            raw: Number(String(initial).replace(/\D/g, '') || 0),
+            fmt(v) {
+                const clean = String(v ?? '').replace(/\D/g, '');
+                this.raw = clean ? Number(clean) : 0;
+                this.display = this.raw.toLocaleString('id-ID');
+                return this.display;
+            }
+        };
+    };
+    // Dipakai tombol preset (mis. modal laci cepat 100.000).
+    window.moneySet = function (id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = Number(value).toLocaleString('id-ID');
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+</script>
+
 </body>
 </html>

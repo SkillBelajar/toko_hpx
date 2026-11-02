@@ -26,15 +26,15 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('tenant.shift.store') }}" class="mt-5 space-y-4">
+        <form method="POST" action="{{ route('tenant.shift.store') }}" class="mt-5 space-y-4" x-data="money({{ (int) old('opening_amount', 0) }})">
             @csrf
 
             <div>
                 <label for="opening_amount" class="block text-sm font-medium text-slate-700">Modal Laci Awal (Rp)</label>
                 <div class="relative mt-1">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-sm font-semibold text-slate-400">Rp</span>
-                    <input id="opening_amount" name="opening_amount" type="number" inputmode="numeric" min="0" step="1000"
-                        required autofocus value="{{ old('opening_amount') }}"
+                    <input id="opening_amount" name="opening_amount" type="text" inputmode="numeric"
+                        required autofocus x-model="display" @input="display = fmt(display)"
                         class="block w-full rounded-xl border border-slate-300 py-4 pl-12 pr-4 text-2xl font-bold tracking-tight text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                         placeholder="0">
                 </div>
@@ -44,7 +44,7 @@
             <div class="flex flex-wrap gap-2">
                 @foreach ([100000, 200000, 500000, 1000000] as $preset)
                     <button type="button"
-                        onclick="document.getElementById('opening_amount').value={{ $preset }}"
+                        onclick="moneySet('opening_amount', {{ $preset }})"
                         class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
                         {{ number_format($preset, 0, ',', '.') }}
                     </button>

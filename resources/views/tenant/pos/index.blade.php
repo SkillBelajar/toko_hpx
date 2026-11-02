@@ -104,7 +104,8 @@
         <option value="nominal">Rp</option>
         <option value="percent">%</option>
       </select>
-      <input x-model.number="discountValue" type="number" inputmode="numeric" min="0" :placeholder="discountType==='percent' ? 'Diskon %' : 'Potongan Rp'"
+      <input x-data="money(0)" x-model="discountDisplay" @input="discountDisplay = fmt(discountDisplay); discountValue = raw" type="text" inputmode="numeric"
+        :placeholder="discountType==='percent' ? 'Diskon %' : 'Potongan Rp'"
         class="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
     </div>
     <div class="flex justify-between text-sm" x-show="discountAmount() > 0">
@@ -129,9 +130,9 @@
           class="rounded-lg px-2 py-2 text-xs font-bold">Campur</button>
       </div>
       <div x-show="method==='mixed'" class="mt-2 grid grid-cols-3 gap-2">
-        <div><label class="text-[11px] text-slate-500">Cash</label><input x-model.number="pay.cash" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
-        <div><label class="text-[11px] text-slate-500">QRIS</label><input x-model.number="pay.qris" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
-        <div><label class="text-[11px] text-slate-500">Transfer</label><input x-model.number="pay.transfer" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
+        <div><label class="text-[11px] text-slate-500">Cash</label><input x-data="money(0)" x-model="payCashDisplay" @input="payCashDisplay = fmt(payCashDisplay); pay.cash = raw" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
+        <div><label class="text-[11px] text-slate-500">QRIS</label><input x-data="money(0)" x-model="payQrisDisplay" @input="payQrisDisplay = fmt(payQrisDisplay); pay.qris = raw" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
+        <div><label class="text-[11px] text-slate-500">Transfer</label><input x-data="money(0)" x-model="payTransferDisplay" @input="payTransferDisplay = fmt(payTransferDisplay); pay.transfer = raw" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
       </div>
       <p x-show="method==='mixed' && (pay.cash+pay.qris+pay.transfer) !== total()" class="mt-1.5 text-[11px] font-semibold text-red-600"
         x-text="'Jumlah harus Rp ' + rupiah(total())"></p>

@@ -48,7 +48,7 @@
             </div>
         </dl>
 
-        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4" x-data="{ closing: {{ (int) old('closing_amount', 0) }}, expected: {{ (int) $expectedAmount }}, cash: {{ (int) ($expectedCash ?? 0) }}, qris: {{ (int) ($expectedQris ?? 0) }}, transfer: {{ (int) ($expectedTransfer ?? 0) }}, closingCash: {{ (int) old('closing_cash', 0) }}, closingQris: {{ (int) old('closing_qris', 0) }}, closingTransfer: {{ (int) old('closing_transfer', 0) }}, mode: 'total' }"
+        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4" x-data="{ closing: {{ (int) old('closing_amount', 0) }}, expected: {{ (int) $expectedAmount }}, cash: {{ (int) ($expectedCash ?? 0) }}, qris: {{ (int) ($expectedQris ?? 0) }}, transfer: {{ (int) ($expectedTransfer ?? 0) }}, closingCash: {{ (int) old('closing_cash', 0) }}, closingQris: {{ (int) old('closing_qris', 0) }}, closingTransfer: {{ (int) old('closing_transfer', 0) }}, mode: 'total', closingDisplay: moneyFmt({{ (int) old('closing_amount', 0) }}), closingCashDisplay: moneyFmt({{ (int) old('closing_cash', 0) }}), closingQrisDisplay: moneyFmt({{ (int) old('closing_qris', 0) }}), closingTransferDisplay: moneyFmt({{ (int) old('closing_transfer', 0) }}) }"
             onsubmit="return confirm('Tutup shift sekarang? Shift yang sudah ditutup tidak bisa dibuka kembali.')">
             @csrf
             @method('PUT')
@@ -64,8 +64,8 @@
                 <label for="closing_amount" class="block text-sm font-medium text-slate-700">Uang Fisik Laci Akhir (Rp)</label>
                 <div class="relative mt-1">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-sm font-semibold text-slate-400">Rp</span>
-                    <input id="closing_amount" name="closing_amount" type="number" inputmode="numeric" min="0" step="1000"
-                        required x-model.number="closing" value="{{ old('closing_amount') }}"
+                    <input id="closing_amount" name="closing_amount" type="text" inputmode="numeric"
+                        required x-model="closingDisplay" @input="closingDisplay = moneyFmt(closingDisplay); closing = Number(String(closingDisplay).replace(/\D/g,'')) || 0"
                         class="block w-full rounded-xl border border-slate-300 py-4 pl-12 pr-4 text-2xl font-bold tracking-tight text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30" placeholder="0">
                 </div>
                 <input type="hidden" name="closing_cash" :value="mode==='total' ? 0 : closingCash">
@@ -77,17 +77,20 @@
             <div x-show="mode==='breakdown'" x-cloak class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Cash (Rp)</label>
-                    <input name="closing_cash" type="number" inputmode="numeric" min="0" x-model.number="closingCash" @input="closing = closingCash + closingQris + closingTransfer"
+                    <input name="closing_cash" type="text" inputmode="numeric" x-model="closingCashDisplay"
+                        @input="closingCashDisplay = moneyFmt(closingCashDisplay); closingCash = Number(String(closingCashDisplay).replace(/\D/g,'')) || 0; closing = closingCash + closingQris + closingTransfer"
                         class="mt-1 block w-full rounded-xl border border-slate-300 py-3 px-3 text-lg font-bold focus:border-red-500 focus:outline-none" placeholder="0">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700">QRIS (Rp)</label>
-                    <input name="closing_qris" type="number" inputmode="numeric" min="0" x-model.number="closingQris" @input="closing = closingCash + closingQris + closingTransfer"
+                    <input name="closing_qris" type="text" inputmode="numeric" x-model="closingQrisDisplay"
+                        @input="closingQrisDisplay = moneyFmt(closingQrisDisplay); closingQris = Number(String(closingQrisDisplay).replace(/\D/g,'')) || 0; closing = closingCash + closingQris + closingTransfer"
                         class="mt-1 block w-full rounded-xl border border-slate-300 py-3 px-3 text-lg font-bold focus:border-red-500 focus:outline-none" placeholder="0">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Transfer (Rp)</label>
-                    <input name="closing_transfer" type="number" inputmode="numeric" min="0" x-model.number="closingTransfer" @input="closing = closingCash + closingQris + closingTransfer"
+                    <input name="closing_transfer" type="text" inputmode="numeric" x-model="closingTransferDisplay"
+                        @input="closingTransferDisplay = moneyFmt(closingTransferDisplay); closingTransfer = Number(String(closingTransferDisplay).replace(/\D/g,'')) || 0; closing = closingCash + closingQris + closingTransfer"
                         class="mt-1 block w-full rounded-xl border border-slate-300 py-3 px-3 text-lg font-bold focus:border-red-500 focus:outline-none" placeholder="0">
                 </div>
                 <input name="closing_amount" type="hidden" x-model="closing">

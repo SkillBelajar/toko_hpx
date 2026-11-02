@@ -69,10 +69,13 @@ class InventoryController extends Controller
             'imei'        => ['required', 'string'],
             'tipe_hp'     => ['required', 'string', 'max:120'],
             'brand'       => ['nullable', 'string', 'max:80'],
+            'price_buy'   => ['nullable', 'integer', 'min:0'],
             'price_sell'  => ['required', 'integer', 'min:0'],
             'entry_date'  => ['required', 'date'],
         ], [
             'imei.required' => 'Nomor IMEI wajib diisi.',
+            'price_buy.min' => 'Harga modal tidak boleh negatif.',
+            'price_sell.min' => 'Harga jual tidak boleh negatif.',
         ]);
 
         $imei = preg_replace('/\D/', '', $data['imei']);
@@ -91,11 +94,12 @@ class InventoryController extends Controller
             return back()->withInput()->withErrors(['imei' => 'IMEI ini sudah ada di stok toko Anda.']);
         }
 
-        DB::transaction(function () use ($inventory, $data, $imei) {
+        DB::transaction(function () use ($inventory, $tenant, $data, $imei) {
             $before = [
                 'imei' => $inventory->imei,
                 'tipe_hp' => $inventory->product?->tipe_hp,
                 'brand' => $inventory->product?->brand,
+                'price_buy' => $inventory->product?->price_buy,
                 'price_sell' => $inventory->product?->price_sell,
                 'entry_date' => optional($inventory->entry_date)->toDateString(),
             ];
@@ -111,6 +115,7 @@ class InventoryController extends Controller
             $inventory->product->update([
                 'tipe_hp'    => $data['tipe_hp'],
                 'brand'      => $data['brand'] ?: null,
+                'price_buy'  => $data['price_buy'] ?? null,
                 'price_sell' => $data['price_sell'],
             ]);
 
@@ -118,6 +123,7 @@ class InventoryController extends Controller
                 'imei' => $inventory->imei,
                 'tipe_hp' => $data['tipe_hp'],
                 'brand' => $data['brand'] ?: null,
+                'price_buy' => $data['price_buy'] ?? null,
                 'price_sell' => $data['price_sell'],
                 'entry_date' => $data['entry_date'],
             ];
