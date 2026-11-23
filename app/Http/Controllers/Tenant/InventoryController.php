@@ -18,14 +18,60 @@ class InventoryController extends Controller
         $tenant = $request->user()->tenant;
 
         $search = trim((string) $request->query('q'));
+        $selectedBrand = trim((string) $request->query('brand'));
+        $view = $request->query('view', 'product');
 
+        // Daftar brand untuk filter beserta stok tersedia
+        $brands = Product::query()
+            ->where('products.tenant_id', $tenant?->id)
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->select('products.brand', DB::raw('count(inventories.id) as total_stock'))
+            ->leftJoin('inventories', function ($join) {
+                $join->on('products.id', '=', 'inventories.product_id')
+                    ->where('inventories.status', '=', Inventory::STATUS_AVAILABLE);
+            })
+            ->groupBy('products.brand')
+            ->orderBy('products.brand')
+            ->get();
+
+        $totalAvailableStock = Inventory::where('tenant_id', $tenant?->id)
+            ->available()
+            ->count();
+
+        // 1. Rekap per tipe produk (memperlihatkan stok unit tersedia)
+        $products = Product::query()
+            ->where('products.tenant_id', $tenant?->id)
+            ->withCount([
+                'inventories as stock_available' => fn ($q) => $q->where('status', Inventory::STATUS_AVAILABLE),
+                'inventories as stock_sold' => fn ($q) => $q->where('status', Inventory::STATUS_SOLD),
+                'inventories as stock_total',
+            ])
+            ->with(['inventories' => fn ($q) => $q->orderBy('status')->orderByDesc('entry_date')])
+            ->when($selectedBrand !== '', fn ($q) => $q->where('products.brand', $selectedBrand))
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sq) use ($search) {
+                    $sq->where('products.tipe_hp', 'like', "%{$search}%")
+                        ->orWhere('products.brand', 'like', "%{$search}%")
+                        ->orWhereHas('inventories', fn ($iq) => $iq->where('imei', 'like', "%{$search}%"));
+                });
+            })
+            ->orderByDesc('stock_available')
+            ->orderBy('products.tipe_hp')
+            ->paginate(20, ['*'], 'p_page')
+            ->withQueryString();
+
+        // 2. Rincian per nomor IMEI
         $inventories = Inventory::query()
             ->where('tenant_id', $tenant?->id)
             ->with('product')
+            ->when($selectedBrand !== '', function ($q) use ($selectedBrand) {
+                $q->whereHas('product', fn ($p) => $p->where('brand', $selectedBrand));
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('imei', 'like', "%{$search}%")
-                        ->orWhereHas('product', fn ($p) => $p->where('tipe_hp', 'like', "%{$search}%"));
+                        ->orWhereHas('product', fn ($p) => $p->where('tipe_hp', 'like', "%{$search}%")->orWhere('brand', 'like', "%{$search}%"));
                 });
             })
             ->orderByDesc('entry_date')
@@ -36,6 +82,11 @@ class InventoryController extends Controller
         return view('tenant.inventory.index', [
             'tenant' => $tenant,
             'inventories' => $inventories,
+            'products' => $products,
+            'brands' => $brands,
+            'selectedBrand' => $selectedBrand,
+            'view' => $view,
+            'totalAvailableStock' => $totalAvailableStock,
             'search' => $search,
             'imeiUsed' => $tenant?->imeiUsed() ?? 0,
             'imeiLimit' => $tenant?->imeiLimit(),

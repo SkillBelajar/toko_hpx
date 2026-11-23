@@ -5,8 +5,23 @@
 
 @section('content')
 
-{{-- Kuota IMEI --}}
-<div class="mb-4 grid gap-4 sm:grid-cols-3">
+{{-- Kuota IMEI & Statistik Stok --}}
+<div class="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Stok Siap Jual</p>
+        <p class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-700">
+            {{ $totalAvailableStock }}
+            <span class="text-xs font-semibold text-slate-400">Unit</span>
+        </p>
+        <p class="mt-3 text-xs text-slate-500">Total unit ready di etalase</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Stok Mengendap</p>
+        <p class="mt-2 text-2xl font-extrabold tracking-tight {{ $agingCount > 0 ? 'text-red-600' : 'text-slate-900' }}">{{ $agingCount }}</p>
+        <p class="mt-3 text-xs text-slate-500">Available lebih dari 30 hari</p>
+    </div>
+
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">IMEI Terpakai</p>
         <p class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
@@ -21,12 +36,6 @@
         @else
             <p class="mt-3 text-xs font-semibold text-emerald-600">Paket unlimited</p>
         @endif
-    </div>
-
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Stok Mengendap</p>
-        <p class="mt-2 text-2xl font-extrabold tracking-tight {{ $agingCount > 0 ? 'text-red-600' : 'text-slate-900' }}">{{ $agingCount }}</p>
-        <p class="mt-3 text-xs text-slate-500">Available lebih dari 30 hari</p>
     </div>
 
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -89,7 +98,7 @@
                     <label for="brand" class="block text-sm font-medium text-slate-700">Brand</label>
                     <input id="brand" name="brand" type="text" value="{{ old('brand') }}"
                         class="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                        placeholder="Samsung">
+                        placeholder="Mis. VIVO, OPPO, Samsung">
                 </div>
             </div>
 
@@ -187,111 +196,298 @@
     </div>
 </div>
 
-{{-- Pencarian --}}
-<form method="GET" action="{{ route('tenant.inventory.index') }}" class="mb-4 flex gap-2">
-    <input name="q" type="search" value="{{ $search }}"
-        class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-        placeholder="Cari tipe HP atau nomor IMEI...">
-    <button type="submit" class="shrink-0 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">Cari</button>
-    @if ($search !== '')
-        <a href="{{ route('tenant.inventory.index') }}" class="shrink-0 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
-    @endif
-    <a href="{{ route('tenant.export.inventory', request()->only('q')) }}"
-        class="shrink-0 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">Export .xls</a>
-</form>
+{{-- Bar Pencarian & Filter Brand --}}
+<div class="mb-4 space-y-3">
+    <form method="GET" action="{{ route('tenant.inventory.index') }}" class="flex flex-col sm:flex-row gap-2">
+        <input type="hidden" name="view" value="{{ $view }}">
+        @if ($selectedBrand)
+            <input type="hidden" name="brand" value="{{ $selectedBrand }}">
+        @endif
 
-{{-- Tabel stok --}}
-<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div class="overflow-x-auto">
-        <table class="w-full min-w-[48rem] text-left text-sm">
-            <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold">Tipe HP</th>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold">IMEI</th>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold">Harga</th>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold">Tanggal Masuk</th>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold">Umur Stok</th>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold">Status</th>
-                    <th class="whitespace-nowrap px-4 py-3 font-semibold text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($inventories as $item)
-                    @php $isAging = $item->isAging(); @endphp
-                    <tr class="{{ $isAging ? 'bg-red-100' : 'hover:bg-slate-50/70' }}">
-                        <td class="whitespace-nowrap px-4 py-3">
-                            <span class="font-semibold {{ $isAging ? 'text-red-700' : 'text-slate-900' }}">{{ $item->product?->tipe_hp ?? '—' }}</span>
-                            @if ($item->product?->brand)
-                                <span class="block text-xs text-slate-500">{{ $item->product->brand }}</span>
-                            @endif
-                        </td>
-                        <td class="whitespace-nowrap px-4 py-3 font-mono text-xs {{ $isAging ? 'text-red-700' : 'text-slate-700' }}">{{ $item->imei }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 {{ $isAging ? 'text-red-700' : 'text-slate-700' }}">
-                            Rp {{ number_format($item->product?->price_sell ?? 0, 0, ',', '.') }}
-                        </td>
-                        <td class="whitespace-nowrap px-4 py-3 {{ $isAging ? 'text-red-700' : 'text-slate-600' }}">
-                            {{ $item->entry_date->format('d M Y') }}
-                        </td>
-                        <td class="whitespace-nowrap px-4 py-3">
-                            <span class="font-semibold {{ $isAging ? 'text-red-700' : 'text-slate-700' }}">{{ $item->ageInDays() }} hari</span>
-                            @if ($isAging)
-                                <span class="ml-1 rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white">Mengendap</span>
-                            @endif
-                        </td>
-                        <td class="whitespace-nowrap px-4 py-3">
-                            @if ($item->status === 'available')
-                                <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">Available</span>
-                            @else
-                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">Sold</span>
-                            @endif
-                        </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-center">
-                            <a href="{{ route('tenant.inventory.edit', $item) }}"
-                                class="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
-                                Edit
-                            </a>
-                            @if ($item->status === 'available')
-                            {{-- Konfirmasi 2 tahap: cegah salah klik (standar #9 Safety) --}}
-                            <form method="POST" action="{{ route('tenant.inventory.destroy', $item) }}" class="inline js-confirm-delete"
-                                data-imei="{{ $item->imei }}" data-tipe="{{ $item->product?->tipe_hp }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100">
-                                    Hapus
-                                </button>
-                            </form>
-                            @else
-                                <span class="text-[11px] text-slate-400" title="Unit terjual punya riwayat transaksi, tidak bisa dihapus.">terkunci</span>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">
-                            {{ $search !== '' ? 'Tidak ada stok yang cocok dengan pencarian.' : 'Belum ada stok. Tambahkan IMEI pertama Anda.' }}
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        <div class="relative flex-1">
+            <input name="q" type="search" value="{{ $search }}"
+                class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 pl-10 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                placeholder="Cari nomor IMEI, tipe HP, atau brand (mis. vivo Y05)...">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </span>
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition">
+                Cari
+            </button>
+            @if ($search !== '' || $selectedBrand !== '')
+                <a href="{{ route('tenant.inventory.index', ['view' => $view]) }}"
+                   class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+                    Reset
+                </a>
+            @endif
+            <a href="{{ route('tenant.export.inventory', request()->only('q', 'brand')) }}"
+               class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition whitespace-nowrap">
+                Export .xls
+            </a>
+        </div>
+    </form>
+
+    {{-- Filter Cek Stok Berdasarkan Brand (Pill Buttons) --}}
+    @if ($brands->isNotEmpty())
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            <span class="font-bold uppercase tracking-wider text-slate-400 shrink-0">Brand:</span>
+            <a href="{{ route('tenant.inventory.index', array_merge(request()->except('brand', 'page', 'p_page'), ['brand' => null])) }}"
+               class="shrink-0 rounded-lg px-3 py-1.5 font-bold transition {{ $selectedBrand === '' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' }}">
+                Semua Brand ({{ $totalAvailableStock }})
+            </a>
+            @foreach ($brands as $b)
+                <a href="{{ route('tenant.inventory.index', array_merge(request()->except('page', 'p_page'), ['brand' => $b->brand])) }}"
+                   class="shrink-0 rounded-lg px-3 py-1.5 font-bold transition flex items-center gap-1 {{ $selectedBrand === $b->brand ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-600/30' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50' }}">
+                    <span>{{ $b->brand }}</span>
+                    <span class="rounded-full px-1.5 py-0.2 text-[10px] {{ $selectedBrand === $b->brand ? 'bg-indigo-800 text-white' : 'bg-slate-100 text-slate-600' }}">{{ $b->total_stock }}</span>
+                </a>
+            @endforeach
+        </div>
+    @endif
+</div>
+
+{{-- Switcher Mode Tampilan: Rekap Stok Produk vs Rincian IMEI --}}
+<div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+    <div class="flex items-center gap-2">
+        <a href="{{ route('tenant.inventory.index', array_merge(request()->all(), ['view' => 'product'])) }}"
+           class="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition {{ $view !== 'imei' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+            <span>📦</span> Rekap Stok Produk
+        </a>
+        <a href="{{ route('tenant.inventory.index', array_merge(request()->all(), ['view' => 'imei'])) }}"
+           class="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition {{ $view === 'imei' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+            <span>📱</span> Rincian Semua IMEI
+        </a>
+    </div>
+
+    <div class="text-xs text-slate-500">
+        @if ($selectedBrand)
+            Brand: <span class="font-bold text-indigo-700">{{ $selectedBrand }}</span> &middot;
+        @endif
+        @if ($search !== '')
+            Pencarian: "<span class="font-semibold text-slate-800">{{ $search }}</span>" &middot;
+        @endif
+        Total: <strong class="text-slate-800">{{ $view === 'imei' ? $inventories->total() . ' unit IMEI' : $products->total() . ' tipe produk' }}</strong>
     </div>
 </div>
 
-<div class="mt-4">{{ $inventories->links() }}</div>
+@if ($view !== 'imei')
+    {{-- ======================================================== --}}
+    {{-- MODE 1: REKAP STOK PRODUK (Contoh: vivo Y05 ... stok 10) --}}
+    {{-- ======================================================== --}}
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[48rem] text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Brand & Tipe HP</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Harga Jual</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Stok Tersedia</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Total Unit</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold text-center">Rincian IMEI & Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($products as $p)
+                        <tr class="hover:bg-slate-50/80 transition" x-data="{ openImei: false }">
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-center gap-2">
+                                    @if ($p->brand)
+                                        <span class="inline-block rounded-md bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-[11px] font-extrabold text-indigo-700 uppercase">
+                                            {{ $p->brand }}
+                                        </span>
+                                    @endif
+                                    <span class="font-bold text-slate-900 text-sm">{{ $p->tipe_hp }}</span>
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3.5">
+                                <span class="font-semibold text-slate-900">Rp {{ number_format($p->price_sell ?? 0, 0, ',', '.') }}</span>
+                                @if ($p->price_buy)
+                                    <span class="block text-[11px] text-slate-400">Modal: Rp {{ number_format($p->price_buy, 0, ',', '.') }}</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3.5">
+                                @if ($p->stock_available > 0)
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-800 shadow-xs">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Stok: {{ $p->stock_available }} Unit
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
+                                        Habis (0 Unit)
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3.5 text-xs text-slate-600">
+                                <span class="font-bold text-slate-800">{{ $p->stock_total }} Unit</span>
+                                <span class="block text-[11px] text-slate-400">{{ $p->stock_sold }} Terjual</span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3.5 text-center">
+                                <button type="button" @click="openImei = !openImei"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition">
+                                    <span>🔍</span>
+                                    <span x-text="openImei ? 'Tutup IMEI' : 'Lihat IMEI ({{ $p->stock_available }})'"></span>
+                                </button>
 
-{{-- Konfirmasi 2 tahap untuk hapus stok (standar #9: salah klik tidak merusak data) --}}
+                                {{-- Dropdown/Drawer Daftar IMEI unit ini --}}
+                                <div x-cloak x-show="openImei" x-collapse
+                                     class="mt-3 text-left rounded-xl border border-slate-200 bg-slate-50/90 p-3 shadow-inner">
+                                    <div class="mb-2 flex items-center justify-between">
+                                        <p class="text-xs font-bold text-slate-700">
+                                            Daftar IMEI untuk: <span class="text-indigo-600">{{ $p->tipe_hp }}</span>
+                                        </p>
+                                        <span class="text-[11px] text-slate-500">{{ $p->inventories->count() }} unit terdaftar</span>
+                                    </div>
+                                    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 max-h-60 overflow-y-auto p-1">
+                                        @foreach ($p->inventories as $inv)
+                                            <div class="flex items-center justify-between gap-2 rounded-lg border {{ $inv->status === 'available' ? 'border-emerald-200 bg-white' : 'border-slate-200 bg-slate-100 opacity-60' }} p-2 text-xs">
+                                                <div>
+                                                    <span class="font-mono font-bold {{ $inv->status === 'available' ? 'text-slate-900' : 'text-slate-500 line-through' }}">
+                                                        {{ $inv->imei }}
+                                                    </span>
+                                                    <span class="block text-[10px] text-slate-400">
+                                                        Masuk: {{ optional($inv->entry_date)->format('d/m/Y') }} &middot; {{ $inv->ageInDays() }} hr
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center gap-1">
+                                                    @if ($inv->status === 'available')
+                                                        <a href="{{ route('tenant.inventory.edit', $inv) }}"
+                                                           class="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700 hover:bg-indigo-100">
+                                                            Edit
+                                                        </a>
+                                                        <form method="POST" action="{{ route('tenant.inventory.destroy', $inv) }}" class="inline js-confirm-delete"
+                                                              data-imei="{{ $inv->imei }}" data-tipe="{{ $p->tipe_hp }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 hover:bg-red-100">
+                                                                Hapus
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <span class="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">Terjual</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">
+                                {{ $search !== '' || $selectedBrand !== '' ? 'Tidak ada produk yang cocok dengan filter atau pencarian.' : 'Belum ada produk. Tambahkan stok pertama Anda.' }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">{{ $products->links() }}</div>
+
+@else
+    {{-- ======================================================== --}}
+    {{-- MODE 2: RINCIAN SEMUA IMEI (Per Unit Baris)               --}}
+    {{-- ======================================================== --}}
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[48rem] text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Tipe HP</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">IMEI</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Harga</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Tanggal Masuk</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Umur Stok</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold">Status</th>
+                        <th class="whitespace-nowrap px-4 py-3 font-semibold text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($inventories as $item)
+                        @php $isAging = $item->isAging(); @endphp
+                        <tr class="{{ $isAging ? 'bg-red-50' : 'hover:bg-slate-50/70' }}">
+                            <td class="whitespace-nowrap px-4 py-3">
+                                <span class="font-semibold {{ $isAging ? 'text-red-700' : 'text-slate-900' }}">{{ $item->product?->tipe_hp ?? '—' }}</span>
+                                @if ($item->product?->brand)
+                                    <span class="inline-block ml-1 rounded bg-slate-100 px-1.5 py-0.2 text-[10px] font-semibold text-slate-600 uppercase">{{ $item->product->brand }}</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 font-mono text-xs {{ $isAging ? 'text-red-700' : 'text-slate-700' }} font-bold">
+                                {{ $item->imei }}
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 {{ $isAging ? 'text-red-700' : 'text-slate-700' }}">
+                                Rp {{ number_format($item->product?->price_sell ?? 0, 0, ',', '.') }}
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 {{ $isAging ? 'text-red-700' : 'text-slate-600' }}">
+                                {{ $item->entry_date->format('d M Y') }}
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3">
+                                <span class="font-semibold {{ $isAging ? 'text-red-700' : 'text-slate-700' }}">{{ $item->ageInDays() }} hari</span>
+                                @if ($isAging)
+                                    <span class="ml-1 rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white">Mengendap</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3">
+                                @if ($item->status === 'available')
+                                    <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">Available</span>
+                                @else
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500">Sold</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-center">
+                                <a href="{{ route('tenant.inventory.edit', $item) }}"
+                                    class="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
+                                    Edit
+                                </a>
+                                @if ($item->status === 'available')
+                                    <form method="POST" action="{{ route('tenant.inventory.destroy', $item) }}" class="inline js-confirm-delete"
+                                        data-imei="{{ $item->imei }}" data-tipe="{{ $item->product?->tipe_hp }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-[11px] text-slate-400" title="Unit terjual punya riwayat transaksi, tidak bisa dihapus.">terkunci</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">
+                                {{ $search !== '' || $selectedBrand !== '' ? 'Tidak ada unit IMEI yang cocok dengan filter atau pencarian.' : 'Belum ada stok. Tambahkan IMEI pertama Anda.' }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">{{ $inventories->links() }}</div>
+@endif
+
+{{-- Konfirmasi 2 tahap untuk hapus stok (delegasi event: berlaku untuk semua form) --}}
 <script>
-document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
-    form.addEventListener('submit', function (e) {
-        if (form.dataset.confirmed === '1') return;
-        e.preventDefault();
-        var imei = form.dataset.imei, tipe = form.dataset.tipe || '';
-        if (!confirm('Hapus ' + tipe + ' (IMEI ' + imei + ') dari stok?')) return;
-        if (!confirm('Konfirmasi kedua: tindakan ini tidak bisa dibatalkan. Tetap hapus?')) return;
-        form.dataset.confirmed = '1';
-        form.submit();
-    });
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest('.js-confirm-delete');
+    if (!form) return;
+    if (form.dataset.confirmed === '1') return;
+    e.preventDefault();
+    var imei = form.dataset.imei, tipe = form.dataset.tipe || '';
+    if (!confirm('Hapus ' + tipe + ' (IMEI ' + imei + ') dari stok?')) return;
+    if (!confirm('Konfirmasi kedua: tindakan ini tidak bisa dibatalkan. Tetap hapus?')) return;
+    form.dataset.confirmed = '1';
+    form.submit();
 });
 
 // Scan cepat IMEI: kamera tetap menyala, tiap hasil scan ditambahkan ke kotak IMEI.
@@ -300,7 +496,6 @@ function imeiScanner() {
         active: false, scanner: null, status: '', last: '', scanned: [],
         init() {
             window.addEventListener('beforeunload', () => { if (this.scanner) this.stop(); });
-            // Lepas kamera sebelum form disubmit — stream aktif bisa membatalkan submit.
             window.addEventListener('inventory:stop-scan', () => { if (this.scanner) this.stop(); });
         },
         pushToBox(imei) {
@@ -347,7 +542,6 @@ function imeiScanner() {
         async stop() {
             this.active = false;
             if (this.scanner) {
-                // ImeiScanner hanya punya stop(); clear() adalah API html5-qrcode lama.
                 try { await this.scanner.stop(); } catch (e) {}
                 this.scanner = null;
             }

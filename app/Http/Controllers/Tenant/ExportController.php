@@ -18,10 +18,21 @@ class ExportController extends Controller
     public function inventory(Request $request): StreamedResponse
     {
         $tenant = $request->user()->tenant;
+        $search = trim((string) $request->query('q'));
+        $brand = trim((string) $request->query('brand'));
 
         $rows = Inventory::query()
             ->where('tenant_id', $tenant?->id)
             ->with('product')
+            ->when($brand !== '', function ($q) use ($brand) {
+                $q->whereHas('product', fn ($p) => $p->where('brand', $brand));
+            })
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('imei', 'like', "%{$search}%")
+                        ->orWhereHas('product', fn ($p) => $p->where('tipe_hp', 'like', "%{$search}%")->orWhere('brand', 'like', "%{$search}%"));
+                });
+            })
             ->orderByDesc('entry_date')
             ->orderByDesc('id')
             ->get();

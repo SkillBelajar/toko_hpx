@@ -53,4 +53,9 @@ class Product extends Model
     {
         return $this->hasMany(Inventory::class);
     }
+
+    public function availableInventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class)->where('status', Inventory::STATUS_AVAILABLE);
+    }
 }
