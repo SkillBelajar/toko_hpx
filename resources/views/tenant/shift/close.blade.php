@@ -48,7 +48,8 @@
             </div>
         </dl>
 
-        x-data="{ closing: {{ moneyInt(old('closing_amount', 0)) }}, expected: {{ (int) $expectedAmount }}, cash: {{ (int) ($expectedCash ?? 0) }}, qris: {{ (int) ($expectedQris ?? 0) }}, transfer: {{ (int) ($expectedTransfer ?? 0) }}, closingCash: {{ moneyInt(old('closing_cash', 0)) }}, closingQris: {{ moneyInt(old('closing_qris', 0)) }}, closingTransfer: {{ moneyInt(old('closing_transfer', 0)) }}, mode: 'total', closingDisplay: moneyFmt({{ moneyInt(old('closing_amount', 0)) }}), closingCashDisplay: moneyFmt({{ moneyInt(old('closing_cash', 0)) }}), closingQrisDisplay: moneyFmt({{ moneyInt(old('closing_qris', 0)) }}), closingTransferDisplay: moneyFmt({{ moneyInt(old('closing_transfer', 0)) }}) }"
+        <form method="POST" action="{{ route('tenant.shift.update') }}" class="mt-5 space-y-4"
+            x-data="{ closing: {{ (int) preg_replace('/\D/', '', (string) old('closing_amount', 0)) }}, expected: {{ (int) $expectedAmount }}, cash: {{ (int) ($expectedCash ?? 0) }}, qris: {{ (int) ($expectedQris ?? 0) }}, transfer: {{ (int) ($expectedTransfer ?? 0) }}, closingCash: {{ (int) preg_replace('/\D/', '', (string) old('closing_cash', 0)) }}, closingQris: {{ (int) preg_replace('/\D/', '', (string) old('closing_qris', 0)) }}, closingTransfer: {{ (int) preg_replace('/\D/', '', (string) old('closing_transfer', 0)) }}, mode: 'total', closingDisplay: '0', closingCashDisplay: '0', closingQrisDisplay: '0', closingTransferDisplay: '0' }"
             onsubmit="return confirm('Tutup shift sekarang? Shift yang sudah ditutup tidak bisa dibuka kembali.')">
             @csrf
             @method('PUT')
