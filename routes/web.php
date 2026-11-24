@@ -69,6 +69,7 @@ Route::middleware(['auth', 'role:tenant'])
         Route::get('/pos/nota/{notaId}/print', [PosController::class, 'printNota'])->name('pos.nota.print');
 
         Route::get('/reports', [ReportController::class, 'sales'])->name('reports');
+        Route::get('/reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
         Route::get('/reports/shifts', [ReportController::class, 'shifts'])->name('reports.shifts');
         Route::get('/guide', [GuideController::class, 'index'])->name('guide');
 

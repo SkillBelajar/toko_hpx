@@ -46,7 +46,7 @@
 
     <!-- Filter Bar Lengkap -->
     <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-        <form method="GET" action="{{ route('tenant.reports.sales') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <form method="GET" action="{{ route('tenant.reports') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
             <div>
                 <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Dari Tanggal</label>
                 <input type="date" name="from" value="{{ $from }}" class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">

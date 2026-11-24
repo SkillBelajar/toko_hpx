@@ -23,35 +23,27 @@ class ReportController extends Controller
         $dpFilter = $request->query('dp_status'); // 'dp', 'no_dp'
         $search = trim((string) $request->query('q', ''));
 
-        $query = Transaction::where('transactions.tenant_id', $tenantId)
+        $baseQuery = Transaction::where('transactions.tenant_id', $tenantId)
             ->whereBetween('transactions.created_at', [$from, $to])
             ->join('inventories', 'inventories.id', '=', 'transactions.inventory_id')
-            ->join('products', 'products.id', '=', 'inventories.product_id')
-            ->select(
-                'transactions.*',
-                'inventories.imei',
-                'products.brand',
-                'products.tipe_hp',
-                'products.price_buy',
-                'products.price_sell'
-            );
+            ->join('products', 'products.id', '=', 'inventories.product_id');
 
         if ($method) {
-            $query->where('transactions.payment_method', $method);
+            $baseQuery->where('transactions.payment_method', $method);
         }
 
         if ($creditProvider) {
-            $query->where('transactions.credit_provider', $creditProvider);
+            $baseQuery->where('transactions.credit_provider', $creditProvider);
         }
 
         if ($dpFilter === 'dp') {
-            $query->where('transactions.is_dp', true);
+            $baseQuery->where('transactions.is_dp', true);
         } elseif ($dpFilter === 'no_dp') {
-            $query->where('transactions.is_dp', false);
+            $baseQuery->where('transactions.is_dp', false);
         }
 
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
+            $baseQuery->where(function ($q) use ($search) {
                 $q->where('transactions.nota_id', 'like', "%{$search}%")
                   ->orWhere('inventories.imei', 'like', "%{$search}%")
                   ->orWhere('products.brand', 'like', "%{$search}%")
@@ -60,8 +52,7 @@ class ReportController extends Controller
         }
 
         // Summary aggregations
-        $summaryQuery = clone $query;
-        $summary = (clone $summaryQuery)->selectRaw('
+        $summary = (clone $baseQuery)->selectRaw('
             COUNT(transactions.id) as total_units,
             SUM(transactions.final_price) as total_omzet,
             SUM(transactions.total_price) as total_gross,
@@ -78,7 +69,18 @@ class ReportController extends Controller
         $totalHpp = (int) ($summary->total_hpp ?? 0);
         $totalLaba = $totalOmzet - $totalHpp;
 
-        $transactions = $query->orderByDesc('transactions.created_at')->paginate(25)->withQueryString();
+        $transactions = (clone $baseQuery)
+            ->select(
+                'transactions.*',
+                'inventories.imei',
+                'products.brand',
+                'products.tipe_hp',
+                'products.price_buy',
+                'products.price_sell'
+            )
+            ->orderByDesc('transactions.created_at')
+            ->paginate(25)
+            ->withQueryString();
 
         return view('tenant.reports.sales', [
             'from'            => $from->toDateString(),
