@@ -63,7 +63,7 @@
     <p class="text-xs font-bold uppercase tracking-wider text-indigo-700">Cara jualan — 3 langkah</p>
     <ol class="mt-1.5 space-y-1 text-sm text-indigo-900">
       <li><strong>1.</strong> Scan barcode atau ketik IMEI HP.</li>
-      <li><strong>2.</strong> Set diskon &amp; metode bayar (Cash/QRIS/Transfer/Campur).</li>
+      <li><strong>2.</strong> Set diskon &amp; metode bayar (Cash/Kredit Leasing/QRIS/Transfer/Campur).</li>
       <li><strong>3.</strong> Tekan tombol hijau "Bayar". Struk tersimpan otomatis.</li>
     </ol>
     <a href="{{ route('tenant.guide') }}" class="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline">Panduan lengkap &rarr;</a>
@@ -104,7 +104,7 @@
         <option value="nominal">Rp</option>
         <option value="percent">%</option>
       </select>
-      <input x-data="money(0)" x-model="discountDisplay" @input="discountDisplay = fmt(discountDisplay); discountValue = raw" type="text" inputmode="numeric"
+      <input x-model="discountDisplay" @input="formatDiscountInput()" type="text" inputmode="numeric"
         :placeholder="discountType==='percent' ? 'Diskon %' : 'Potongan Rp'"
         class="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
     </div>
@@ -119,9 +119,12 @@
 
     {{-- Metode bayar --}}
     <div class="rounded-xl border border-slate-200 p-2.5">
-      <div class="grid grid-cols-4 gap-1 text-center">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Metode Pembayaran</p>
+      <div class="grid grid-cols-5 gap-1 text-center">
         <button type="button" @click="setMethod('cash')" :class="method==='cash' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'"
           class="rounded-lg px-2 py-2 text-xs font-bold">Cash</button>
+        <button type="button" @click="setMethod('credit')" :class="method==='credit' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600'"
+          class="rounded-lg px-2 py-2 text-xs font-bold">Kredit</button>
         <button type="button" @click="setMethod('qris')" :class="method==='qris' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'"
           class="rounded-lg px-2 py-2 text-xs font-bold">QRIS</button>
         <button type="button" @click="setMethod('transfer')" :class="method==='transfer' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'"
@@ -129,10 +132,50 @@
         <button type="button" @click="setMethod('mixed')" :class="method==='mixed' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'"
           class="rounded-lg px-2 py-2 text-xs font-bold">Campur</button>
       </div>
+
+      {{-- Form Spesifik Kredit Leasing & DP --}}
+      <div x-show="method==='credit'" class="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-200 space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-purple-900 mb-1">Pilih Leasing / Finansial Kredit</label>
+          <select x-model="creditProvider" class="w-full rounded-lg border-purple-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-purple-500 focus:ring-purple-500">
+            @foreach($creditProviders as $slug => $label)
+              <option value="{{ $slug }}">{{ $label }}</option>
+            @endforeach
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-purple-900 mb-1">Ketentuan Uang Muka (DP)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" @click="isDp = false; dpAmount = 0; dpDisplay = '0'" 
+              :class="!isDp ? 'bg-purple-700 text-white font-bold' : 'bg-white text-purple-800 border border-purple-200'"
+              class="rounded-lg px-3 py-2 text-xs transition">
+              Tanpa DP (0 DP)
+            </button>
+            <button type="button" @click="isDp = true" 
+              :class="isDp ? 'bg-purple-700 text-white font-bold' : 'bg-white text-purple-800 border border-purple-200'"
+              class="rounded-lg px-3 py-2 text-xs transition">
+              Ada DP
+            </button>
+          </div>
+        </div>
+
+        <div x-show="isDp" class="pt-1">
+          <label class="block text-xs font-semibold text-purple-900 mb-1">Nominal DP Diterima (Kas Tunai)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-xs font-bold text-slate-400">Rp</span>
+            <input x-model="dpDisplay" @input="formatDpInput()" type="text" inputmode="numeric" placeholder="Contoh: 500.000"
+              class="w-full rounded-lg border-purple-300 pl-9 pr-3 py-2 text-sm font-semibold text-slate-800 focus:border-purple-500 focus:ring-purple-500">
+          </div>
+          <p class="mt-1 text-[11px] text-purple-700">*Nominal DP akan dicatat sebagai penerimaan uang kas di shift kasir.</p>
+        </div>
+      </div>
+
+      {{-- Form Spesifik Campur --}}
       <div x-show="method==='mixed'" class="mt-2 grid grid-cols-3 gap-2">
-        <div><label class="text-[11px] text-slate-500">Cash</label><input x-data="money(0)" x-model="payCashDisplay" @input="payCashDisplay = fmt(payCashDisplay); pay.cash = raw" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
-        <div><label class="text-[11px] text-slate-500">QRIS</label><input x-data="money(0)" x-model="payQrisDisplay" @input="payQrisDisplay = fmt(payQrisDisplay); pay.qris = raw" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
-        <div><label class="text-[11px] text-slate-500">Transfer</label><input x-data="money(0)" x-model="payTransferDisplay" @input="payTransferDisplay = fmt(payTransferDisplay); pay.transfer = raw" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
+        <div><label class="text-[11px] text-slate-500">Cash</label><input x-model="payCashDisplay" @input="formatPayInput('cash')" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
+        <div><label class="text-[11px] text-slate-500">QRIS</label><input x-model="payQrisDisplay" @input="formatPayInput('qris')" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
+        <div><label class="text-[11px] text-slate-500">Transfer</label><input x-model="payTransferDisplay" @input="formatPayInput('transfer')" type="text" inputmode="numeric" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"></div>
       </div>
       <p x-show="method==='mixed' && (pay.cash+pay.qris+pay.transfer) !== total()" class="mt-1.5 text-[11px] font-semibold text-red-600"
         x-text="'Jumlah harus Rp ' + rupiah(total())"></p>
@@ -172,6 +215,12 @@
           <span>Total</span><span x-text="rupiah(total())"></span>
         </div>
         <p class="mt-1 text-[11px] font-semibold text-amber-800" x-text="'Metode: ' + methodLabel()"></p>
+        <template x-if="method === 'credit'">
+          <div class="mt-1 text-xs text-purple-900 font-semibold bg-purple-100/60 p-2 rounded-lg">
+            <p x-text="'Leasing: ' + creditProviderLabel()"></p>
+            <p x-text="isDp ? ('DP: ' + rupiah(dpAmount)) : 'Tanpa DP'"></p>
+          </div>
+        </template>
       </div>
 
       <div x-cloak x-show="checkoutError" class="mt-4 w-full max-w-sm rounded-xl border-2 border-red-700 bg-red-50 px-4 py-3 text-left">

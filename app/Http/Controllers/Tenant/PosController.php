@@ -27,6 +27,7 @@ class PosController extends Controller
             'packageActive' => $tenant?->packageActive() ?? true,
             'expiredDate' => $tenant?->expired_date,
             'waLink' => $this->upgradeWaLink($tenant),
+            'creditProviders' => Transaction::CREDIT_PROVIDERS,
         ]);
     }
 
@@ -64,9 +65,7 @@ class PosController extends Controller
     /**
      * Checkout multi-item dalam satu nota.
      * Validasi: paket aktif + limit transaksi -> lalu lock tiap item dan insert
-     * satu baris Transaction per item dengan notan/nama nota_id yang sama.
-     * Diskon dibagi proporsional per item agar rekonsiliasi (sum final_price)
-     * selalu tepat terhadap total nota.
+     * satu baris Transaction per item dengan nota_id yang sama.
      */
     public function checkout(Request $request): JsonResponse
     {
@@ -88,7 +87,7 @@ class PosController extends Controller
             );
         }
 
-        // (b) limit total transaksi — dihitung terhadap BANYAK item yang akan diinput
+        // limit total transaksi
         $requested = (int) count((array) ($request->input('items') ?? []));
         if ($tenant->transactionLimitReached() && $requested === 0) {
             return $this->blocked(
@@ -106,10 +105,9 @@ class PosController extends Controller
             );
         }
 
-        // Diskon nominal & pembayaran campuran dikirim bertitik ("1.500.000")
-        // dari input format rupiah; ubah ke angka bersih sebelum validasi.
+        // Diskon nominal & pembayaran dikirim bertitik ("1.500.000")
         $money = [];
-        foreach (['discount_value', 'payment.cash', 'payment.qris', 'payment.transfer'] as $k) {
+        foreach (['discount_value', 'dp_amount', 'payment.cash', 'payment.qris', 'payment.transfer'] as $k) {
             $raw = $request->input($k);
             if ($raw !== null && $raw !== '') {
                 $money[$k] = (int) preg_replace('/\D/', '', (string) $raw);
@@ -119,14 +117,19 @@ class PosController extends Controller
             $request->merge($money);
         }
 
+        $validProviders = array_keys(Transaction::CREDIT_PROVIDERS);
+
         $data = $request->validate([
-            'items' => ['required', 'array', 'min:1'],
-            'items.*' => ['required', 'integer', 'distinct'],
-            'discount_type' => ['nullable', 'in:nominal,percent'],
-            'discount_value' => ['nullable', 'integer', 'min:0'],
-            'payment_method' => ['required', 'in:'.implode(',', CashShift::PAYMENT_METHODS)],
-            'payment.cash' => ['nullable', 'integer', 'min:0'],
-            'payment.qris' => ['nullable', 'integer', 'min:0'],
+            'items'            => ['required', 'array', 'min:1'],
+            'items.*'          => ['required', 'integer', 'distinct'],
+            'discount_type'    => ['nullable', 'in:nominal,percent'],
+            'discount_value'   => ['nullable', 'integer', 'min:0'],
+            'payment_method'   => ['required', 'in:'.implode(',', Transaction::PAYMENT_METHODS)],
+            'credit_provider'  => ['nullable', 'required_if:payment_method,credit', 'in:'.implode(',', $validProviders)],
+            'is_dp'            => ['nullable', 'boolean'],
+            'dp_amount'        => ['nullable', 'integer', 'min:0'],
+            'payment.cash'     => ['nullable', 'integer', 'min:0'],
+            'payment.qris'     => ['nullable', 'integer', 'min:0'],
             'payment.transfer' => ['nullable', 'integer', 'min:0'],
         ]);
 
@@ -143,7 +146,6 @@ class PosController extends Controller
                     ->get()
                     ->keyBy('id');
 
-                // semua id harus valid & available
                 if (count($items) !== count($data['items'])) {
                     throw new \RuntimeException('Ada unit yang tidak tersedia atau sudah terjual.');
                 }
@@ -152,17 +154,32 @@ class PosController extends Controller
                 $discount = $this->calculateDiscount($discountType, $discountValue, $gross);
                 $finalTotal = $gross - $discount;
 
-                // Validasi pembayaran: mixed harus pas; single cukup satu kolom
                 $method = $data['payment_method'];
+                $creditProvider = $method === 'credit' ? ($data['credit_provider'] ?? null) : null;
+                $isDp = $method === 'credit' ? (bool) ($data['is_dp'] ?? false) : false;
+                $dpAmount = ($isDp && $method === 'credit') ? (int) ($data['dp_amount'] ?? 0) : 0;
+
+                if ($method === 'credit' && $isDp && $dpAmount <= 0) {
+                    throw new \RuntimeException('Nominal DP harus lebih dari Rp 0 jika memilih opsi Ada DP.');
+                }
+
+                if ($method === 'credit' && $dpAmount > $finalTotal) {
+                    throw new \RuntimeException('Nominal DP tidak boleh melebihi total nota (Rp '.number_format($finalTotal, 0, ',', '.').').');
+                }
+
                 $pay = array_merge(
                     ['cash' => 0, 'qris' => 0, 'transfer' => 0],
                     array_map('intval', $data['payment'] ?? [])
                 );
+
                 if ($method === 'mixed') {
                     $totalInput = $pay['cash'] + $pay['qris'] + $pay['transfer'];
                     if ($totalInput !== $finalTotal) {
                         throw new \RuntimeException('Jumlah breakdown pembayaran tidak sama dengan total nota (Rp '.$finalTotal.').');
                     }
+                } elseif ($method === 'credit') {
+                    // Jika ada DP, masukkan DP sebagai penerimaan kas tunai di kasir
+                    $pay = ['cash' => $dpAmount, 'qris' => 0, 'transfer' => 0];
                 } else {
                     $pay = array_fill_keys(['cash', 'qris', 'transfer'], 0);
                     $pay[$method] = $finalTotal;
@@ -170,27 +187,41 @@ class PosController extends Controller
 
                 $notaId = Str::upper(Str::random(8));
 
-                // Distribusi diskon proporsional per item, sisa di item terakhir
+                // Distribusi diskon & DP proporsional per item
                 $itemIds = $items->keys()->all();
-                $allocated = 0;
+                $allocatedDiscount = 0;
+                $allocatedDp = 0;
                 $rows = [];
                 $priceBy = $items->map(fn ($i) => (int) ($i->product?->price_sell ?? 0));
+
                 foreach (array_keys($itemIds) as $idx) {
                     $price = (int) ($priceBy[$itemIds[$idx]] ?? 0);
                     $isLast = $idx === count($itemIds) - 1;
+
+                    // Diskon proporsional
                     $d = $isLast
-                        ? $discount - $allocated
+                        ? $discount - $allocatedDiscount
                         : (int) round($discount * ($price / max(1, $gross)));
-                    $allocated += $d;
+                    $allocatedDiscount += $d;
+
+                    // DP proporsional
+                    $dp = 0;
+                    if ($isDp && $dpAmount > 0) {
+                        $dp = $isLast
+                            ? $dpAmount - $allocatedDp
+                            : (int) round($dpAmount * ($price / max(1, $gross)));
+                        $allocatedDp += $dp;
+                    }
 
                     $rows[] = [
                         'id' => $itemIds[$idx],
                         'price' => $price,
                         'discount' => max(0, min($d, $price)),
+                        'dp' => max(0, min($dp, $price)),
                     ];
                 }
 
-                // Simpan semua transaksi
+                // Simpan transaksi
                 foreach ($rows as $r) {
                     $item = $items[$r['id']];
                     $item->update(['status' => Inventory::STATUS_SOLD]);
@@ -198,31 +229,51 @@ class PosController extends Controller
                         'status' => ['old' => Inventory::STATUS_AVAILABLE, 'new' => Inventory::STATUS_SOLD],
                         'nota_id' => ['old' => null, 'new' => $notaId],
                     ]);
+
+                    $itemFinalPrice = $r['price'] - $r['discount'];
+                    $itemPayCash = ($method === 'credit') ? $r['dp'] : ($method === 'cash' ? $itemFinalPrice : 0);
+                    $itemPayQris = ($method === 'qris') ? $itemFinalPrice : 0;
+                    $itemPayTransfer = ($method === 'transfer') ? $itemFinalPrice : 0;
+
+                    if ($method === 'mixed') {
+                        // Bagi proporsional pembayaran mixed jika ada
+                        $ratio = $gross > 0 ? ($r['price'] / $gross) : (1 / count($rows));
+                        $itemPayCash = (int) round($pay['cash'] * $ratio);
+                        $itemPayQris = (int) round($pay['qris'] * $ratio);
+                        $itemPayTransfer = (int) round($pay['transfer'] * $ratio);
+                    }
+
                     Transaction::create([
-                        'tenant_id' => $tenant->id,
-                        'shift_id' => $shift->id,
-                        'nota_id' => $notaId,
-                        'inventory_id' => $item->id,
-                        'total_price' => $r['price'],
+                        'tenant_id'       => $tenant->id,
+                        'shift_id'        => $shift->id,
+                        'nota_id'         => $notaId,
+                        'inventory_id'    => $item->id,
+                        'total_price'     => $r['price'],
                         'discount_amount' => $r['discount'],
-                        'discount_type' => $discountType ?? 'nominal',
-                        'payment_method' => $method,
-                        'payment_cash' => $pay['cash'],
-                        'payment_qris' => $pay['qris'],
-                        'payment_transfer' => $pay['transfer'],
-                        'final_price' => $r['price'] - $r['discount'],
+                        'discount_type'   => $discountType ?? 'nominal',
+                        'payment_method'  => $method,
+                        'credit_provider' => $creditProvider,
+                        'dp_amount'       => $r['dp'],
+                        'is_dp'           => $isDp,
+                        'payment_cash'    => $itemPayCash,
+                        'payment_qris'    => $itemPayQris,
+                        'payment_transfer'=> $itemPayTransfer,
+                        'final_price'     => $itemFinalPrice,
                     ]);
                 }
 
-                // Rekonsiliasi laci dari seluruh transaksi shift — cukup 1x setelah semua insert
                 $shift->recalculateExpected();
 
                 return [
-                    'nota_id' => $notaId,
-                    'final_total' => $finalTotal,
-                    'gross' => $gross,
-                    'discount' => $discount,
-                    'count' => count($rows),
+                    'nota_id'         => $notaId,
+                    'final_total'     => $finalTotal,
+                    'gross'           => $gross,
+                    'discount'        => $discount,
+                    'payment_method'  => $method,
+                    'credit_provider' => $creditProvider,
+                    'is_dp'           => $isDp,
+                    'dp_amount'       => $dpAmount,
+                    'count'           => count($rows),
                 ];
             });
         } catch (\RuntimeException $e) {
@@ -232,14 +283,71 @@ class PosController extends Controller
         }
 
         return response()->json([
-            'ok' => true,
-            'message' => 'Transaksi berhasil ('.$nota['count'].' item).',
-            'nota_id' => $nota['nota_id'],
-            'total_price' => $nota['final_total'],
-            'gross' => $nota['gross'],
-            'discount' => $nota['discount'],
+            'ok'               => true,
+            'message'          => 'Transaksi berhasil ('.$nota['count'].' item).',
+            'nota_id'          => $nota['nota_id'],
+            'print_url'        => route('tenant.pos.nota.print', ['notaId' => $nota['nota_id']]),
+            'total_price'      => $nota['final_total'],
+            'gross'            => $nota['gross'],
+            'discount'         => $nota['discount'],
+            'payment_method'   => $nota['payment_method'],
+            'credit_provider'  => $nota['credit_provider'],
+            'is_dp'            => $nota['is_dp'],
+            'dp_amount'        => $nota['dp_amount'],
             'transaction_used' => $tenant->transactionUsed(),
-            'transaction_limit' => $tenant->transactionLimit(),
+            'transaction_limit'=> $tenant->transactionLimit(),
+        ]);
+    }
+
+    public function printNota(Request $request, string $notaId): View
+    {
+        $tenant = $request->user()->tenant;
+        if (! $tenant) {
+            abort(403, 'Tenant tidak ditemukan.');
+        }
+
+        $transactions = Transaction::where('tenant_id', $tenant->id)
+            ->where('nota_id', $notaId)
+            ->with(['inventory.product', 'shift.user'])
+            ->get();
+
+        if ($transactions->isEmpty()) {
+            abort(404, 'Nota transaksi tidak ditemukan.');
+        }
+
+        $first = $transactions->first();
+        $kasirName = $first->shift?->user?->name ?? $request->user()->name;
+        $createdAt = $first->created_at;
+        $paymentMethod = $first->payment_method;
+        $creditProvider = $first->credit_provider;
+        $isDp = (bool) $first->is_dp;
+
+        $gross = (int) $transactions->sum('total_price');
+        $discount = (int) $transactions->sum('discount_amount');
+        $finalTotal = (int) $transactions->sum('final_price');
+        $dpAmount = (int) $transactions->sum('dp_amount');
+        $payCash = (int) $transactions->sum('payment_cash');
+        $payQris = (int) $transactions->sum('payment_qris');
+        $payTransfer = (int) $transactions->sum('payment_transfer');
+
+        return view('tenant.pos.nota_print', [
+            'tenant'          => $tenant,
+            'notaId'          => $notaId,
+            'transactions'    => $transactions,
+            'first'           => $first,
+            'kasirName'       => $kasirName,
+            'createdAt'       => $createdAt,
+            'paymentMethod'   => $paymentMethod,
+            'creditProvider'  => $creditProvider,
+            'isDp'            => $isDp,
+            'gross'           => $gross,
+            'discount'        => $discount,
+            'finalTotal'      => $finalTotal,
+            'dpAmount'        => $dpAmount,
+            'payCash'         => $payCash,
+            'payQris'         => $payQris,
+            'payTransfer'     => $payTransfer,
+            'creditProviders' => Transaction::CREDIT_PROVIDERS,
         ]);
     }
 

@@ -1,163 +1,203 @@
 @extends('tenant.layout')
 
 @section('title', 'Laporan Penjualan')
-@section('heading', 'Laporan Penjualan')
 
 @section('content')
-<div class="mx-auto max-w-4xl">
-
-    {{-- Ringkasan --}}
-    <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Hari Ini</p>
-            <p class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
-                Rp {{ number_format($todayTotal, 0, ',', '.') }}
-            </p>
-            <p class="mt-1 text-xs text-slate-500">
-                {{ $todayCount }} HP terjual
-                &middot; modal Rp {{ number_format($todayCost, 0, ',', '.') }}
-            </p>
-            <p class="mt-1 text-sm font-bold {{ $todayProfit >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                Laba: Rp {{ number_format($todayProfit, 0, ',', '.') }}
-            </p>
-            <a href="{{ route('tenant.reports.shifts') }}" class="mt-3 inline-block text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-                Lihat rekap shift &rarr;
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Laporan Penjualan</h1>
+            <p class="text-sm text-gray-500">Rekap omzet, keuntungan, serta rincian transaksi tunai & kredit leasing.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('tenant.export.sales', request()->all()) }}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Ekspor Excel (.xls)
             </a>
-        </div>
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Bulan Ini ({{ now()->translatedFormat('F Y') }})</p>
-            <p class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
-                Rp {{ number_format($monthTotal, 0, ',', '.') }}
-            </p>
-            <p class="mt-1 text-xs text-slate-500">
-                {{ $monthCount }} HP terjual
-                &middot; modal Rp {{ number_format($monthCost, 0, ',', '.') }}
-            </p>
-            <p class="mt-1 text-sm font-bold {{ $monthProfit >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                Laba: Rp {{ number_format($monthProfit, 0, ',', '.') }}
-            </p>
-        </div>
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Rentang Dipilih</p>
-            <p class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
-                Rp {{ number_format($rangeTotal, 0, ',', '.') }}
-            </p>
-            <p class="mt-1 text-xs text-slate-500">
-                {{ $rangeCount }} HP
-                &middot; modal Rp {{ number_format($rangeCost, 0, ',', '.') }}
-            </p>
-            <p class="mt-1 text-sm font-bold {{ $rangeProfit >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                Laba: Rp {{ number_format($rangeProfit, 0, ',', '.') }}
-            </p>
         </div>
     </div>
 
-    @if ($incompleteCost > 0)
-        <p class="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-            {{ $incompleteCost }} transaksi pada rentang ini belum punya harga modal,
-            jadi laba ruginya <strong>masih direncanakan kurang</strong> (modal dihitung 0).
-            Isi harga modal di form tambah stok agar laporan akurat.
-        </p>
-    @endif
-
-    {{-- Filter rentang tanggal --}}
-    <form method="GET" action="{{ route('tenant.reports') }}"
-        class="mt-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end">
-        <div class="flex-1">
-            <label for="from" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Dari</label>
-            <input id="from" name="from" type="date" value="{{ $from?->format('Y-m-d') }}"
-                class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+    <!-- Ringkasan Finansial -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Omzet</p>
+            <p class="mt-1 text-xl font-bold text-gray-900">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">{{ $totalUnits }} unit terjual</p>
         </div>
-        <div class="flex-1">
-            <label for="to" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Sampai</label>
-            <input id="to" name="to" type="date" value="{{ $to?->format('Y-m-d') }}"
-                class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Estimasi Laba</p>
+            <p class="mt-1 text-xl font-bold text-emerald-600">Rp {{ number_format($totalLaba, 0, ',', '.') }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">Total HPP: Rp {{ number_format($totalHpp, 0, ',', '.') }}</p>
         </div>
-        <div class="flex gap-2">
-            <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">Terapkan</button>
-            @if ($hasRange)
-                <a href="{{ route('tenant.reports') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
-            @endif
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Kredit Leasing</p>
+            <p class="mt-1 text-xl font-bold text-purple-600">Rp {{ number_format($totalCredit, 0, ',', '.') }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">DP Terkumpul: Rp {{ number_format($totalDp, 0, ',', '.') }}</p>
         </div>
-    </form>
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Kas Tunai (Cash & DP)</p>
+            <p class="mt-1 text-xl font-bold text-blue-600">Rp {{ number_format($totalCash, 0, ',', '.') }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">QRIS: Rp {{ number_format($totalQris, 0, ',', '.') }} | TF: Rp {{ number_format($totalTransfer, 0, ',', '.') }}</p>
+        </div>
+    </div>
 
-    @php
-        $sections = $hasRange
-            ? [['label' => 'Rentang '.($from?->format('d M Y') ?? '…').' — '.($to?->format('d M Y') ?? '…'), 'rows' => $rangeTransactions, 'total' => $rangeTotal, 'cost' => $rangeCost, 'profit' => $rangeProfit, 'count' => $rangeCount]]
-            : [
-                ['label' => 'Hari Ini — '.now()->format('d M Y'), 'rows' => $todayTransactions, 'total' => $todayTotal, 'cost' => $todayCost, 'profit' => $todayProfit, 'count' => $todayCount],
-                ['label' => 'Bulan Ini — '.now()->translatedFormat('F Y'), 'rows' => $monthTransactions, 'total' => $monthTotal, 'cost' => $monthCost, 'profit' => $monthProfit, 'count' => $monthCount],
-            ];
-    @endphp
-
-    @foreach ($sections as $section)
-        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
-                <h2 class="text-sm font-bold text-slate-900">{{ $section['label'] }}</h2>
-                <p class="text-xs text-slate-500">
-                    Omzet <strong class="text-slate-900">Rp {{ number_format($section['total'], 0, ',', '.') }}</strong>
-                    &middot; modal Rp {{ number_format($section['cost'], 0, ',', '.') }}
-                    &middot; laba
-                    <strong class="{{ $section['profit'] >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                        Rp {{ number_format($section['profit'], 0, ',', '.') }}
-                    </strong>
-                    &middot; {{ $section['count'] }} HP
-                </p>
-                <a href="{{ route('tenant.export.sales', request()->only('from', 'to')) }}"
-                    class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                    Export .xls
-                </a>
+    <!-- Filter Bar Lengkap -->
+    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <form method="GET" action="{{ route('tenant.reports.sales') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Dari Tanggal</label>
+                <input type="date" name="from" value="{{ $from }}" class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
             </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Sampai Tanggal</label>
+                <input type="date" name="to" value="{{ $to }}" class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Metode Bayar</label>
+                <select name="method" class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua Metode</option>
+                    <option value="cash" {{ $method === 'cash' ? 'selected' : '' }}>Cash / Tunai</option>
+                    <option value="credit" {{ $method === 'credit' ? 'selected' : '' }}>Kredit (Leasing)</option>
+                    <option value="qris" {{ $method === 'qris' ? 'selected' : '' }}>QRIS</option>
+                    <option value="transfer" {{ $method === 'transfer' ? 'selected' : '' }}>Transfer Bank</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Penyedia Kredit</label>
+                <select name="credit_provider" class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua Leasing</option>
+                    @foreach($creditProviders as $slug => $label)
+                        <option value="{{ $slug }}" {{ $creditProvider === $slug ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Status DP</label>
+                <select name="dp_status" class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua Status DP</option>
+                    <option value="dp" {{ $dpFilter === 'dp' ? 'selected' : '' }}>Ada DP</option>
+                    <option value="no_dp" {{ $dpFilter === 'no_dp' ? 'selected' : '' }}>Tanpa DP (0 DP)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Cari Nota / IMEI / HP</label>
+                <div class="flex gap-2">
+                    <input type="text" name="q" value="{{ $search }}" placeholder="Ketik IMEI / Nota..." class="w-full text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-[52rem] text-left text-sm">
-                    <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                        <tr>
-                            <th class="whitespace-nowrap px-4 py-3 font-semibold">Jam</th>
-                            <th class="whitespace-nowrap px-4 py-3 font-semibold">HP Terjual</th>
-                            <th class="whitespace-nowrap px-4 py-3 font-semibold">IMEI</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right font-semibold">Modal</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right font-semibold">Harga</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right font-semibold">Laba</th>
+    <!-- Tabel Rincian Transaksi -->
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Waktu / Nota</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Unit & IMEI</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status Pembayaran</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga Jual</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Diskon</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Akhir</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Estimasi Laba</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    @forelse($transactions as $t)
+                        @php
+                            $hpp = (int) ($t->price_buy ?? 0);
+                            $final = (int) $t->final_price;
+                            $laba = $final - $hpp;
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-gray-900">{{ $t->nota_id }}</span>
+                                    <a href="{{ route('tenant.pos.nota.print', ['notaId' => $t->nota_id]) }}" target="_blank"
+                                       class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 border border-gray-300 transition"
+                                       title="Cetak Nota A4">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                        </svg>
+                                        Nota
+                                    </a>
+                                </div>
+                                <div class="text-xs text-gray-500">{{ $t->created_at->format('d/m/Y H:i') }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm font-medium text-gray-900">{{ $t->brand }} {{ $t->tipe_hp }}</div>
+                                <div class="text-xs font-mono text-gray-500">{{ $t->imei }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                @if($t->payment_method === 'credit')
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                        </svg>
+                                        KREDIT: {{ $creditProviders[$t->credit_provider] ?? ucfirst($t->credit_provider ?? 'Leasing') }}
+                                    </div>
+                                    <div class="mt-1 text-xs">
+                                        @if($t->is_dp && $t->dp_amount > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                                DP Rp {{ number_format($t->dp_amount, 0, ',', '.') }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                                                Tanpa DP
+                                            </span>
+                                        @endif
+                                    </div>
+                                @elseif($t->payment_method === 'cash')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        CASH / TUNAI
+                                    </span>
+                                @elseif($t->payment_method === 'qris')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                        QRIS
+                                    </span>
+                                @elseif($t->payment_method === 'transfer')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                        TRANSFER BANK
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ strtoupper($t->payment_method) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-right whitespace-nowrap text-sm text-gray-900">
+                                Rp {{ number_format($t->total_price, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-right whitespace-nowrap text-sm text-red-600">
+                                {{ $t->discount_amount > 0 ? '-Rp '.number_format($t->discount_amount, 0, ',', '.') : '—' }}
+                            </td>
+                            <td class="px-4 py-3 text-right whitespace-nowrap text-sm font-bold text-gray-900">
+                                Rp {{ number_format($final, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-right whitespace-nowrap text-sm font-bold {{ $laba >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
+                                Rp {{ number_format($laba, 0, ',', '.') }}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse ($section['rows'] as $trx)
-                            @php
-                                $buy = $trx->inventory?->product?->price_buy;
-                                $profit = $buy === null ? null : (int) $trx->final_price - (int) $buy;
-                            @endphp
-                            <tr class="hover:bg-slate-50/70">
-                                <td class="whitespace-nowrap px-4 py-3 text-slate-600">
-                                    {{ $trx->created_at->format('d M H:i') }}
-                                </td>
-                                <td class="whitespace-nowrap px-4 py-3 font-semibold text-slate-900">
-                                    {{ $trx->inventory?->product?->tipe_hp ?? '—' }}
-                                    <span class="block text-xs font-normal text-slate-500">{{ $trx->inventory?->product?->brand }}</span>
-                                </td>
-                                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-600">{{ $trx->inventory?->imei }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 text-right text-slate-600">
-                                    {{ $buy === null ? '—' : 'Rp '.number_format((int) $buy, 0, ',', '.') }}
-                                </td>
-                                <td class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-900">
-                                    Rp {{ number_format((int) $trx->final_price, 0, ',', '.') }}
-                                </td>
-                                <td class="whitespace-nowrap px-4 py-3 text-right font-bold {{ $profit === null ? 'text-slate-400' : ($profit >= 0 ? 'text-emerald-600' : 'text-rose-600') }}">
-                                    {{ $profit === null ? '—' : 'Rp '.number_format($profit, 0, ',', '.') }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-500">Belum ada penjualan pada periode ini.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500">
+                                Tidak ada transaksi yang sesuai dengan filter pencarian.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    @endforeach
-
+        @if($transactions->hasPages())
+            <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                {{ $transactions->links() }}
+            </div>
+        @endif
+    </div>
 </div>
 @endsection

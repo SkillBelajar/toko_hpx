@@ -66,6 +66,7 @@ Route::middleware(['auth', 'role:tenant'])
         Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
         Route::get('/pos/lookup', [PosController::class, 'lookup'])->name('pos.lookup');
         Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+        Route::get('/pos/nota/{notaId}/print', [PosController::class, 'printNota'])->name('pos.nota.print');
 
         Route::get('/reports', [ReportController::class, 'sales'])->name('reports');
         Route::get('/reports/shifts', [ReportController::class, 'shifts'])->name('reports.shifts');

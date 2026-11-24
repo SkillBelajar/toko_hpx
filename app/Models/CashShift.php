@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CashShift extends Model
 {
-    public const PAYMENT_METHODS = ['cash', 'qris', 'transfer', 'mixed'];
+    public const PAYMENT_METHODS = ['cash', 'qris', 'transfer', 'mixed', 'credit'];
 
     protected $fillable = [
         'tenant_id',
@@ -84,9 +84,10 @@ class CashShift extends Model
                          SUM(payment_cash) as cash, SUM(payment_qris) as qris, SUM(payment_transfer) as transfer')
             ->first();
 
-        $final = (int) ($agg->final ?: 0);
+        // Uang fisik di laci kasir mencakup modal awal + penerimaan kas tunai
+        // (termasuk penerimaan DP cash jika ada, atau cash dari penjualan reguler)
         $this->update([
-            'expected_amount' => (float) ($this->opening_amount + $final),
+            'expected_amount' => (float) ($this->opening_amount + (int) ($agg->cash ?: 0)),
             'expected_cash' => (int) ($agg->cash ?: 0),
             'expected_qris' => (int) ($agg->qris ?: 0),
             'expected_transfer' => (int) ($agg->transfer ?: 0),

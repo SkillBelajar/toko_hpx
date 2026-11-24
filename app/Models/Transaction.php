@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
+    public const PAYMENT_METHODS = ['cash', 'qris', 'transfer', 'mixed', 'credit'];
+
+    public const CREDIT_PROVIDERS = [
+        'akulaku'    => 'Akulaku',
+        'kredivo'    => 'Kredivo',
+        'avanto'     => 'Avanto',
+        'pastfinace' => 'Pastfinace',
+        'fif'        => 'FIF',
+        'yes_kredit' => 'Yes Kredit',
+    ];
+
     protected $fillable = [
         'tenant_id',
         'shift_id',
@@ -16,6 +27,9 @@ class Transaction extends Model
         'discount_amount',
         'discount_type',
         'payment_method',
+        'credit_provider',
+        'dp_amount',
+        'is_dp',
         'payment_cash',
         'payment_qris',
         'payment_transfer',
@@ -27,6 +41,8 @@ class Transaction extends Model
         return [
             'total_price' => 'integer',
             'discount_amount' => 'integer',
+            'dp_amount' => 'integer',
+            'is_dp' => 'boolean',
             'payment_cash' => 'integer',
             'payment_qris' => 'integer',
             'payment_transfer' => 'integer',
@@ -56,5 +72,25 @@ class Transaction extends Model
         }
 
         return (int) $this->total_price;
+    }
+
+    /** Label pembayaran ramah pengguna */
+    public function getPaymentMethodLabelAttribute(): string
+    {
+        if ($this->payment_method === 'credit') {
+            $providerLabel = self::CREDIT_PROVIDERS[$this->credit_provider] ?? ucfirst($this->credit_provider ?? 'Kredit');
+            $dpLabel = $this->is_dp && $this->dp_amount > 0 
+                ? ' (DP Rp ' . number_format($this->dp_amount, 0, ',', '.') . ')' 
+                : ' (Tanpa DP)';
+            return 'Kredit - ' . $providerLabel . $dpLabel;
+        }
+
+        return match ($this->payment_method) {
+            'cash'     => 'Cash / Tunai',
+            'qris'     => 'QRIS',
+            'transfer' => 'Transfer Bank',
+            'mixed'    => 'Campur',
+            default    => ucfirst($this->payment_method ?? '—'),
+        };
     }
 }

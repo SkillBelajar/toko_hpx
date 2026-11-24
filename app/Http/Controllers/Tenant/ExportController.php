@@ -63,6 +63,10 @@ class ExportController extends Controller
 
         $from = $request->date('from')?->startOfDay();
         $to = $request->date('to')?->endOfDay();
+        $method = $request->query('method');
+        $creditProvider = $request->query('credit_provider');
+        $dpFilter = $request->query('dp_status');
+        $search = trim((string) $request->query('q', ''));
 
         $q = Transaction::query()
             ->where('transactions.tenant_id', $tenant?->id)
@@ -71,13 +75,43 @@ class ExportController extends Controller
         if ($from) $q->where('transactions.created_at', '>=', $from);
         if ($to) $q->where('transactions.created_at', '<=', $to);
 
+        if ($method) {
+            $q->where('transactions.payment_method', $method);
+        }
+
+        if ($creditProvider) {
+            $q->where('transactions.credit_provider', $creditProvider);
+        }
+
+        if ($dpFilter === 'dp') {
+            $q->where('transactions.is_dp', true);
+        } elseif ($dpFilter === 'no_dp') {
+            $q->where('transactions.is_dp', false);
+        }
+
+        if ($search !== '') {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('transactions.nota_id', 'like', "%{$search}%")
+                    ->orWhereHas('inventory', function ($inv) use ($search) {
+                        $inv->where('imei', 'like', "%{$search}%")
+                            ->orWhereHas('product', fn ($p) => $p->where('brand', 'like', "%{$search}%")->orWhere('tipe_hp', 'like', "%{$search}%"));
+                    });
+            });
+        }
+
         $rows = $q->latest('transactions.created_at')->get();
 
         return response()->streamDownload(function () use ($rows) {
             $cells = [
-                ['Waktu', 'Nota', 'Tipe HP', 'Brand', 'IMEI', 'Harga', 'Diskon', 'Total Akhir', 'Metode'],
+                ['Waktu', 'Nota', 'Tipe HP', 'Brand', 'IMEI', 'Harga Jual', 'Diskon', 'Total Akhir', 'Metode', 'Leasing / Kredit', 'Keterangan DP', 'Nominal DP'],
             ];
             foreach ($rows as $t) {
+                $providerName = $t->credit_provider ? (Transaction::CREDIT_PROVIDERS[$t->credit_provider] ?? ucfirst($t->credit_provider)) : '-';
+                $dpKet = '-';
+                if ($t->payment_method === 'credit') {
+                    $dpKet = $t->is_dp ? 'Ada DP' : 'Tanpa DP';
+                }
+
                 $cells[] = [
                     $t->created_at->format('Y-m-d H:i'),
                     $t->nota_id,
@@ -87,7 +121,10 @@ class ExportController extends Controller
                     (int) $t->total_price,
                     (int) $t->discount_amount,
                     (int) $t->final_price,
-                    $t->payment_method,
+                    strtoupper($t->payment_method),
+                    $providerName,
+                    $dpKet,
+                    (int) ($t->dp_amount ?? 0),
                 ];
             }
             echo ExportController::xml($cells, 'Penjualan');
